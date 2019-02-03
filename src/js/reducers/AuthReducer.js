@@ -52,7 +52,8 @@ const AuthReducer = (state = initialState, action) => {
 		case TOKEN_REJECTED:
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
-				isAuthenticated: action.isAuthenticated
+				isAuthenticated: action.isAuthenticated,
+				tokenExists: false
 			})
 
 		case TOKEN_VALIDATED:
