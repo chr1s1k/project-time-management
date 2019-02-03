@@ -110,7 +110,7 @@ export function requestValidateToken(token) {
 	}
 }
 
-export function validationSuccess(data) {
+export function tokenValidationSuccess(data) {
 	return {
 		type: TOKEN_VALIDATED,
 		isFetching: false,
@@ -119,7 +119,7 @@ export function validationSuccess(data) {
 	}
 }
 
-export function validationError(message) {
+export function tokenValidationError(message) {
 	return {
 		type: TOKEN_REJECTED,
 		isFetching: false,
@@ -135,10 +135,21 @@ export function validateToken(token) {
 		return axios.post('/api/validateToken.php', {
 			withCredentials: true
 		}).then(response => {
-			dispatch(validationSuccess(response.data))
+			dispatch(tokenValidationSuccess(response.data))
 		}).catch(err => {
 			let errorMessage = handleErrorMessage(err)
-			dispatch(validationError(errorMessage))
+			dispatch(tokenValidationError(errorMessage))
 		})
+	}
+}
+
+
+// akce pro result hlášky
+
+export const CLOSE_MESSAGE = 'CLOSE_MESSAGE'
+
+export function closeMessage() {
+	return {
+		type: CLOSE_MESSAGE
 	}
 }

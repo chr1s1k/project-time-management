@@ -21,15 +21,13 @@ const AuthReducer = (state = initialState, action) => {
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
 				isAuthenticated: action.isAuthenticated,
-				tokenExists: action.jwt ? true : false,
-				errorMessage: ''
+				tokenExists: action.jwt ? true : false
 			})
 
 		case LOGIN_ERROR:
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
-				isAuthenticated: action.isAuthenticated,
-				errorMessage: action.message
+				isAuthenticated: action.isAuthenticated
 			})
 
 		case LOGOUT_REQUEST:
@@ -42,8 +40,7 @@ const AuthReducer = (state = initialState, action) => {
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
 				isAuthenticated: action.isAuthenticated,
-				tokenExists: false,
-				errorMessage: action.message
+				tokenExists: false
 			})
 
 		case VALIDATE_TOKEN_REQUEST:
@@ -55,15 +52,13 @@ const AuthReducer = (state = initialState, action) => {
 		case TOKEN_REJECTED:
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
-				isAuthenticated: action.isAuthenticated,
-				errorMessage: action.message
+				isAuthenticated: action.isAuthenticated
 			})
 
 		case TOKEN_VALIDATED:
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
-				isAuthenticated: action.isAuthenticated,
-				errorMessage: ''
+				isAuthenticated: action.isAuthenticated
 			})
 
 		default:

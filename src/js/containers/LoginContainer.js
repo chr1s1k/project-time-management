@@ -1,8 +1,7 @@
 import React, { Fragment } from 'react'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
-import { Paper, Typography, Grid, withStyles, FormControl, InputLabel, Input, Button, Snackbar, IconButton } from '@material-ui/core/'
-import CloseIcon from '@material-ui/icons/Close'
+import { Paper, Typography, Grid, withStyles, FormControl, InputLabel, Input, Button } from '@material-ui/core/'
 import PropTypes from 'prop-types'
 
 import { loginUser } from '../actions/actions'
@@ -26,26 +25,8 @@ class LoginContainer extends React.Component {
 
 		this.state = {
 			username: '',
-			password: '',
-			messageVisible: true
+			password: ''
 		}
-	}
-
-	handleCloseMessage = (event, reason) => {
-		if (reason === 'clickaway') {
-			return
-		}
-
-		this.setState({
-			messageVisible: false
-		})
-	}
-
-	handleOnCloseMessage = () => {
-		// console.log('closed')
-		// this.setState({
-		// 	messageVisible: !this.state.messageVisible
-		// })
 	}
 
 	handleChange = (event) => {
@@ -58,10 +39,7 @@ class LoginContainer extends React.Component {
 		event.preventDefault()
 
 		if (this.state.username.trim() !== '' && this.state.password.trim() !== '') {
-			const credentials = Object.assign({}, this.state, {
-				username: this.state.username,
-				password: this.state.password
-			}) // vytvoříme si kopii objektu this.state
+			const credentials = Object.assign({}, this.state) // vytvoříme si kopii objektu this.state
 
 			this.props.loginUser(credentials)
 		}
@@ -69,8 +47,7 @@ class LoginContainer extends React.Component {
 
 	render() {
 		const {
-			classes,
-			errorMessage
+			classes
 		} = this.props
 
 		if (this.props.isAuthenticated || this.props.tokenExists) {
@@ -81,30 +58,6 @@ class LoginContainer extends React.Component {
 
 		return (
 			<Fragment>
-				{errorMessage &&
-					<Snackbar
-						anchorOrigin={{
-							vertical: 'top',
-							horizontal: 'right'
-						}}
-						open={this.state.messageVisible}
-						ContentProps={{
-							'aria-describedby': 'statusMessage',
-						}}
-						message={<span id="statusMessage">{errorMessage}</span>}
-						onClose={this.handleOnCloseMessage}
-						action={[
-							<IconButton
-								key="close"
-								aria-label="Close"
-								color="inherit"
-								onClick={this.handleCloseMessage}
-							>
-								<CloseIcon />
-							</IconButton>
-						]}
-					/>
-				}
 
 				<Grid container justify="center">
 					<Grid item xs={10} sm={8} md={6} lg={4} xl={2}>
@@ -159,7 +112,6 @@ function mapStateToProps(state) {
 	return {
 		isAuthenticated: state.auth.isAuthenticated,
 		isFetching: state.auth.isFetching,
-		errorMessage: state.auth.errorMessage,
 		tokenExists: state.auth.tokenExists,
 	}
 }
@@ -167,7 +119,6 @@ function mapStateToProps(state) {
 LoginContainer.propTypes = {
 	classes: PropTypes.object,
 	loginUser: PropTypes.func,
-	errorMessage: PropTypes.string,
 	isAuthenticated: PropTypes.bool,
 	tokenExists: PropTypes.bool,
 }

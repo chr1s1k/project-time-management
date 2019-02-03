@@ -6,8 +6,8 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import requiredAuth from '../withAuth'
 import LoginContainer from '../../containers/LoginContainer'
 import DashboardContainer from '../../containers/DashboardContainer'
-
 import NavBarContainer from '../../containers/NavBarContainer'
+import MessageContainer from '../../containers/MessageContainer'
 
 const theme = createMuiTheme({
 	palette: {
@@ -26,6 +26,7 @@ const App = () => {
 		<MuiThemeProvider theme={theme}>
 			<CssBaseline />
 			<NavBarContainer />
+			<MessageContainer />
 			<Switch>
 				<Route exact path="/" component={LoginContainer} />
 				<Route path="/dashboard" component={requiredAuth(DashboardContainer)} />
