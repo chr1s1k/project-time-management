@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux'
 
-import UserReducer from './UserReducer'
+import AuthReducer from './AuthReducer'
 import ProjectReducer from './ProjectReducer'
 
 const allReducers = combineReducers({
-	user: UserReducer,
+	auth: AuthReducer,
 	projects: ProjectReducer
 })
 

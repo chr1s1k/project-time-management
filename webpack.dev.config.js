@@ -1,4 +1,5 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const WriteFilePlugin = require('write-file-webpack-plugin')
 const path = require('path')
 const merge = require('webpack-merge')
 const commonConfig = require('./webpack.common.config.js')
@@ -6,6 +7,19 @@ const commonConfig = require('./webpack.common.config.js')
 module.exports = merge(commonConfig, {
 	mode: 'development',
 	devtool: 'source-map',
+
+	devServer: {
+		proxy: {
+			'/api': {
+				target: 'http://localhost',
+				pathRewrite: {
+					'^/api': '/project-time-management/public/api/'
+				},
+				secure: false
+			}
+		},
+		historyApiFallback: true
+	},
 
 	module: {
 		rules: [
@@ -36,5 +50,12 @@ module.exports = merge(commonConfig, {
 				]
 			}
 		]
-	}
+	},
+
+	plugins: [
+		// donutí dev server po startu zapsat soubory (adresář api) na filesystem
+		new WriteFilePlugin({
+			test: /api/
+		})
+	]
 })

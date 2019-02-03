@@ -1,12 +1,13 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const path = require('path')
 
 module.exports = {
 	entry: ['./src/js/index.js', './src/assets/stylesheets/main.scss'],
 	output: {
 		path: path.resolve(__dirname, './public'),
-		filename: 'bundle.min.js'
+		filename: 'js/bundle.min.js'
 	},
 
 	module: {
@@ -31,9 +32,9 @@ module.exports = {
 	},
 
 	plugins: [
-		// kompilace SASSu
+		// kompilace SASSu a vytažení do jednoho souboru
 		new MiniCssExtractPlugin({
-			filename: '[name].min.css'
+			filename: 'css/[name].min.css'
 		}),
 
 		// použití HTML šablony a include vygenerovaného bundle
@@ -42,5 +43,15 @@ module.exports = {
 			filename: './index.html',
 			hash: true
 		}),
+
+		// kopírování API adresáře
+		new CopyWebpackPlugin([
+			{
+				from: 'api/**/*', // vezmi celý adresář api a všechno v něm
+				to: './', // output.path = ./public
+				force: true,
+				context: './src/'
+			}
+		])
 	]
 }

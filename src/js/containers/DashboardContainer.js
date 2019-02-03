@@ -1,20 +1,29 @@
 import React, { Fragment } from 'react'
+import { connect } from 'react-redux'
 import { Typography } from '@material-ui/core'
-import NavBar from '../components/NavBar'
+import PropTypes from 'prop-types'
 
 class DashboardContainer extends React.Component {
-	constructor() {
-		super()
-	}
 
 	render() {
 		return (
 			<Fragment>
-				<NavBar />
 				<Typography variant="h1">Toto je dashboard pouze pro přihlášené uživatele!</Typography>
 			</Fragment>
 		)
 	}
+
 }
 
-export default DashboardContainer
+function mapStateToProps(state) {
+	return {
+		isAuthenticated: state.auth.isAuthenticated
+	}
+}
+
+DashboardContainer.propTypes = {
+	isAuthenticated: PropTypes.bool,
+	history: PropTypes.object,
+}
+
+export default connect(mapStateToProps)(DashboardContainer)

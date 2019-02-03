@@ -8,6 +8,11 @@
 		"eslint:recommended",
 		"plugin:react/recommended"
 	],
+	"settings": {
+		"react": {
+			"version": "detect"
+		}
+	},
 	"parser": "babel-eslint",
 	"parserOptions": {
 		"ecmaFeatures": {
@@ -22,7 +27,8 @@
 	"rules": {
 		"indent": [
 			"error",
-			"tab"
+			"tab",
+			{"SwitchCase": 1}
 		],
 		"linebreak-style": [
 			"error",

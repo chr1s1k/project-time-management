@@ -3,8 +3,11 @@ import { Route, Switch } from 'react-router-dom'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
-import SignInContainer from '../../containers/SignInContainer'
+import requiredAuth from '../withAuth'
+import LoginContainer from '../../containers/LoginContainer'
 import DashboardContainer from '../../containers/DashboardContainer'
+
+import NavBarContainer from '../../containers/NavBarContainer'
 
 const theme = createMuiTheme({
 	palette: {
@@ -22,9 +25,10 @@ const App = () => {
 	return (
 		<MuiThemeProvider theme={theme}>
 			<CssBaseline />
+			<NavBarContainer />
 			<Switch>
-				<Route path="/dashboard" component={DashboardContainer}></Route>
-				<Route path="/" component={SignInContainer}></Route>
+				<Route exact path="/" component={LoginContainer} />
+				<Route path="/dashboard" component={requiredAuth(DashboardContainer)} />
 			</Switch>
 		</MuiThemeProvider>
 	)
