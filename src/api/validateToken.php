@@ -34,7 +34,7 @@ if (!is_null($jwt)) {
 		http_response_code(401);
 
 		echo json_encode(array(
-			"message" => "Přístup zamítnut. Vaše přihlášení vypršelo.",
+			"message" => "Vaše přihlášení vypršelo. Přihlašte se prosím znovu.",
 			"error" => $e->getMessage()
 		));
 	}

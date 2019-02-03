@@ -9,6 +9,8 @@ import DashboardContainer from '../../containers/DashboardContainer'
 import NavBarContainer from '../../containers/NavBarContainer'
 import MessageContainer from '../../containers/MessageContainer'
 
+const sidebarWidth = 240
+
 const theme = createMuiTheme({
 	palette: {
 		primary: {
@@ -25,7 +27,7 @@ const App = () => {
 	return (
 		<MuiThemeProvider theme={theme}>
 			<CssBaseline />
-			<NavBarContainer />
+			<NavBarContainer sidebarWidth={sidebarWidth} />
 			<MessageContainer />
 			<Switch>
 				<Route exact path="/" component={LoginContainer} />
