@@ -89,6 +89,7 @@ class LoginContainer extends React.Component {
 									type="submit"
 									variant="contained"
 									color="primary"
+									disabled={this.props.isFetching}
 									fullWidth
 									className={classes.submitBtn}
 									onClick={this.handleSubmit}
@@ -121,6 +122,7 @@ LoginContainer.propTypes = {
 	loginUser: PropTypes.func,
 	isAuthenticated: PropTypes.bool,
 	tokenExists: PropTypes.bool,
+	isFetching: PropTypes.bool,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(LoginContainer))

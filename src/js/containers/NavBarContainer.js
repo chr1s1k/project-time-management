@@ -13,9 +13,6 @@ import { logoutUser, toggleSidebar } from '../actions/actions'
 const sidebarWidth = 240
 
 const styles = (theme) => ({
-	indent: {
-		marginBottom: theme.spacing.unit * 5
-	},
 	grow: {
 		flexGrow: 1
 	},
@@ -101,7 +98,7 @@ function NavBarContainer (props) {
 			</AppBar>
 
 			{/* Div, který udělá odsazení pod fixním appbarem. */}
-			<div className={`${classes.toolbar} ${classes.indent}`} />
+			<div className={`${classes.toolbar}`} />
 		</Fragment>
 	)
 }
@@ -123,7 +120,7 @@ NavBarContainer.propTypes = {
 	logoutUser: PropTypes.func,
 	toggleSidebar: PropTypes.func,
 	sidebarOpened: PropTypes.bool,
-	showMenuIcon: PropTypes.bool,
+	menuIconVisible: PropTypes.bool,
 }
 
 NavBarContainer.defaultProps = {

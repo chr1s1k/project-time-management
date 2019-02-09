@@ -8,6 +8,7 @@ import LoginContainer from '../../containers/LoginContainer'
 import DashboardContainer from '../../containers/DashboardContainer'
 import NavBarContainer from '../../containers/NavBarContainer'
 import MessageContainer from '../../containers/MessageContainer'
+import ProgressBarContainer from '../../containers/ProgressBarContainer'
 
 const sidebarWidth = 240
 
@@ -16,6 +17,9 @@ const theme = createMuiTheme({
 		primary: {
 			main: '#ffa800',
 			contrastText: '#fff'
+		},
+		secondary: {
+			main: '#490dff'
 		}
 	},
 	typography: {
@@ -28,6 +32,7 @@ const App = () => {
 		<MuiThemeProvider theme={theme}>
 			<CssBaseline />
 			<NavBarContainer sidebarWidth={sidebarWidth} />
+			<ProgressBarContainer />
 			<MessageContainer />
 			<Switch>
 				<Route exact path="/" component={LoginContainer} />
