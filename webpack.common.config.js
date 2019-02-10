@@ -7,7 +7,8 @@ module.exports = {
 	entry: ['./src/js/index.js', './src/assets/stylesheets/main.scss'],
 	output: {
 		path: path.resolve(__dirname, './public'),
-		filename: 'js/bundle.min.js'
+		filename: 'js/bundle.min.js',
+		publicPath: '/' // do HTML šablony injectne bundle s lomítkem na začátku
 	},
 
 	module: {

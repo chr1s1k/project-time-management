@@ -2,6 +2,7 @@ import React, { Fragment } from 'react'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import { Paper, Typography, Grid, withStyles, FormControl, InputLabel, Input, Button } from '@material-ui/core/'
+import AccountCircleIcon from '@material-ui/icons/AccountCircle'
 import PropTypes from 'prop-types'
 
 import { loginUser } from '../actions/actions'
@@ -62,6 +63,9 @@ class LoginContainer extends React.Component {
 				<Grid container justify="center">
 					<Grid item xs={10} sm={8} md={6} lg={4} xl={2}>
 						<Paper className={classes.paper}>
+							<Grid container justify="center">
+								<AccountCircleIcon fontSize="large" />
+							</Grid>
 							<Typography component="h1" variant="h5" align="center" className={classes.heading}>Přihlášení</Typography>
 							<form method="post">
 								<FormControl margin="normal" fullWidth required>

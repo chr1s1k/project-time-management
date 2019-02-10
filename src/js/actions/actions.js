@@ -204,6 +204,7 @@ export function hideProgressBar() {
 
 export const PROJECTS_LOADED = 'PROJECTS_LOADED'
 export const CLEAR_PROJECTS = 'CLEAR_PROJECTS'
+export const PROJECT_CREATED = 'PROJECT_CREATED'
 
 export function projectsLoaded(projects) {
 	return {
@@ -218,11 +219,18 @@ export function clearProjects() {
 	}
 }
 
+export function projectCreated(project) {
+	return {
+		type: PROJECT_CREATED,
+		project
+	}
+}
+
 export function loadUserProjects(userId) {
 	return (dispatch) => {
 		dispatch(showProgressBar())
 
-		return axios.get('/api/getUserProjects.php', {
+		return axios.get('http://localhost/project-time-management/public/api/getUserProjects.php', {
 			params: {
 				userId: userId
 			},
@@ -232,6 +240,25 @@ export function loadUserProjects(userId) {
 			dispatch(projectsLoaded(response.data.projects))
 		}).catch(err => {
 			dispatch(hideProgressBar())
+			let errorMessage = handleErrorMessage(err)
+			dispatch(showMessage(errorMessage))
+		})
+	}
+}
+
+export function createProject(project) {
+	return (dispatch) => {
+		dispatch(showProgressBar())
+
+		return axios('/api/createProject.php', {
+			method: 'POST',
+			data: project,
+			withCredentials: true
+		}).then(response => {
+			dispatch(hideProgressBar())
+			dispatch(projectCreated(response.data.project))
+			dispatch(showMessage(response.data.message))
+		}).catch(err => {
 			let errorMessage = handleErrorMessage(err)
 			dispatch(showMessage(errorMessage))
 		})

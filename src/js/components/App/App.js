@@ -36,6 +36,8 @@ const App = () => {
 			<MessageContainer />
 			<Switch>
 				<Route exact path="/" component={LoginContainer} />
+				<Route exact path="/dashboard/new" component={requiredAuth(DashboardContainer)} />
+				<Route exact path="/dashboard/:projectId" component={requiredAuth(DashboardContainer)} />
 				<Route path="/dashboard" component={requiredAuth(DashboardContainer)} />
 			</Switch>
 		</MuiThemeProvider>

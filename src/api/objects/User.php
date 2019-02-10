@@ -210,7 +210,26 @@ class User {
 			return $projects;
 
 		} catch (PDOException $e) {
-			var_dump($e->getMessage());
+			// var_dump($e->getMessage());
+			return array();
+		}
+	}
+
+	public function assignProject($projectId) {
+		if (is_null($this->id) || is_null($this->connection)) {
+			return false;
+		}
+
+		$query = "INSERT INTO assigned_projects (id, project_id, user_id) VALUES (NULL, :project_id, :user_id)";
+
+		$stmt = $this->connection->prepare($query);
+		$stmt->bindParam(':project_id', $projectId);
+		$stmt->bindParam(':user_id', $this->id);
+
+		try {
+			return $stmt->execute();
+		} catch (PDOExecption $e) {
+			return false;
 		}
 	}
 
