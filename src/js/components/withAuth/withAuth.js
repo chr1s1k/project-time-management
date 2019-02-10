@@ -25,7 +25,7 @@ export default function (ComponentRequiredAuth) {
 		}
 
 		componentDidMount() {
-			const token = Cookies.get('jwtToken')
+			const token = Cookies.get('jwt')
 
 			this.props.validateToken(token)
 		}
@@ -35,6 +35,10 @@ export default function (ComponentRequiredAuth) {
 				this.setState({
 					isValidatingToken: false
 				})
+				// pokud neni validni token, tak ho znic
+				if (!this.props.isAuthenticated) {
+					Cookies.remove('jwt')
+				}
 			}
 		}
 

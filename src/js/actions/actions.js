@@ -53,7 +53,7 @@ export function loginUser(credentials) {
 
 		return axios.post('/api/login.php', credentials)
 			.then((response) => {
-				Cookies.set('jwtToken', response.data.jwt, { expires: 1 })
+				Cookies.set('jwt', response.data.jwt, { expires: 1 })
 				dispatch(loginSuccess(response.data))
 			})
 			.catch((err) => {
@@ -90,8 +90,9 @@ export function logoutSuccess() {
 export function logoutUser() {
 	return (dispatch) => {
 		dispatch(requestLogout())
-		Cookies.remove('jwtToken')
+		Cookies.remove('jwt')
 		dispatch(logoutSuccess())
+		dispatch(clearProjects())
 	}
 }
 
@@ -115,7 +116,7 @@ export function tokenValidationSuccess(data) {
 		type: TOKEN_VALIDATED,
 		isFetching: false,
 		isAuthenticated: true,
-		data: data
+		user: data
 	}
 }
 
@@ -147,10 +148,18 @@ export function validateToken(token) {
 // akce pro result hlášky
 
 export const CLOSE_MESSAGE = 'CLOSE_MESSAGE'
+export const SHOW_MESSAGE = 'SHOW_MESSAGE'
 
 export function closeMessage() {
 	return {
 		type: CLOSE_MESSAGE
+	}
+}
+
+export function showMessage(message) {
+	return {
+		type: SHOW_MESSAGE,
+		message: message
 	}
 }
 
@@ -169,5 +178,62 @@ export function toggleSidebar() {
 export function closeSidebar() {
 	return {
 		type: CLOSE_SIDEBAR
+	}
+}
+
+
+// akce pro progress bar
+
+export const SHOW_PROGRESS_BAR = 'SHOW_PROGRESS_BAR'
+export const HIDE_PROGRESS_BAR = 'HIDE_PROGRESS_BAR'
+
+export function showProgressBar() {
+	return {
+		type: SHOW_PROGRESS_BAR
+	}
+}
+
+export function hideProgressBar() {
+	return {
+		type: HIDE_PROGRESS_BAR
+	}
+}
+
+
+// akce pro práci s projekty
+
+export const PROJECTS_LOADED = 'PROJECTS_LOADED'
+export const CLEAR_PROJECTS = 'CLEAR_PROJECTS'
+
+export function projectsLoaded(projects) {
+	return {
+		type: PROJECTS_LOADED,
+		projects
+	}
+}
+
+export function clearProjects() {
+	return {
+		type: CLEAR_PROJECTS
+	}
+}
+
+export function loadUserProjects(userId) {
+	return (dispatch) => {
+		dispatch(showProgressBar())
+
+		return axios.get('/api/getUserProjects.php', {
+			params: {
+				userId: userId
+			},
+			withCredentials: true
+		}).then(response => {
+			dispatch(hideProgressBar())
+			dispatch(projectsLoaded(response.data.projects))
+		}).catch(err => {
+			dispatch(hideProgressBar())
+			let errorMessage = handleErrorMessage(err)
+			dispatch(showMessage(errorMessage))
+		})
 	}
 }

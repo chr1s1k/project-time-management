@@ -32,7 +32,7 @@ function ProgressBarContainer(props) {
 }
 
 const mapStateToProps = (state) => ({
-	isVisible: state.auth.isFetching,
+	isVisible: state.auth.isFetching || state.progressBar.isVisible,
 })
 
 ProgressBarContainer.propTypes = {

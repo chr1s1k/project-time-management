@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { withStyles, Typography, Grid, Drawer, List, ListItem, Divider, ListItemText } from '@material-ui/core'
 import PropTypes from 'prop-types'
 
-import { toggleSidebar, closeSidebar } from '../actions/actions'
+import { toggleSidebar, closeSidebar, loadUserProjects } from '../actions/actions'
 
 const sidebarWidth = 240
 
@@ -33,12 +33,16 @@ class DashboardContainer extends React.Component {
 		props.toggleSidebar()
 	}
 
+	componentDidMount() {
+		this.props.loadUserProjects(this.props.user.id)
+	}
+
 	componentWillUnmount() {
 		this.props.closeSidebar()
 	}
 
 	render() {
-		const { classes, sidebarOpened } = this.props
+		const { classes, sidebarOpened, projects } = this.props
 
 		return (
 			<Fragment>
@@ -60,9 +64,9 @@ class DashboardContainer extends React.Component {
 						</ListItemText>
 					</ListItem>
 					<List>
-						{['Inbox', 'Starred', 'Send email', 'Drafts'].map((text) => (
-							<ListItem button key={text}>
-								<ListItemText primary={text} />
+						{projects.map((project) => (
+							<ListItem button key={project.id}>
+								<ListItemText primary={project.title} />
 							</ListItem>
 						))}
 					</List>
@@ -84,6 +88,8 @@ function mapStateToProps(state) {
 	return {
 		isAuthenticated: state.auth.isAuthenticated,
 		sidebarOpened: state.sidebar.opened,
+		user: state.auth.user,
+		projects: state.projects,
 	}
 }
 
@@ -91,6 +97,7 @@ function mapDispatchToProps(dispatch) {
 	return {
 		toggleSidebar: () => dispatch(toggleSidebar()),
 		closeSidebar: () => dispatch(closeSidebar()),
+		loadUserProjects: (userId) => dispatch(loadUserProjects(userId)),
 	}
 }
 
@@ -101,6 +108,9 @@ DashboardContainer.propTypes = {
 	sidebarOpened: PropTypes.bool,
 	toggleSidebar: PropTypes.func,
 	closeSidebar: PropTypes.func,
+	loadUserProjects: PropTypes.func,
+	user: PropTypes.object,
+	projects: PropTypes.array,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DashboardContainer))

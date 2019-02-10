@@ -5,7 +5,7 @@ import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT_SUCCESS, LOGIN_ERROR, TOKEN_REJECT
 const initialState = {
 	isFetching: false,
 	isAuthenticated: false,
-	tokenExists: Cookies.get('jwtToken') ? true : false,
+	tokenExists: Cookies.get('jwt') ? true : false,
 }
 
 const AuthReducer = (state = initialState, action) => {
@@ -40,7 +40,8 @@ const AuthReducer = (state = initialState, action) => {
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
 				isAuthenticated: action.isAuthenticated,
-				tokenExists: false
+				tokenExists: false,
+				user: {}
 			})
 
 		case VALIDATE_TOKEN_REQUEST:
@@ -59,7 +60,8 @@ const AuthReducer = (state = initialState, action) => {
 		case TOKEN_VALIDATED:
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
-				isAuthenticated: action.isAuthenticated
+				isAuthenticated: action.isAuthenticated,
+				user: Object.assign({}, state.user, action.user.data)
 			})
 
 		default:

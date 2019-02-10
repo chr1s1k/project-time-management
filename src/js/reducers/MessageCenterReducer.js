@@ -1,4 +1,4 @@
-import { LOGIN_ERROR, CLOSE_MESSAGE, TOKEN_REJECTED, LOGOUT_SUCCESS } from '../actions/actions'
+import { LOGIN_ERROR, CLOSE_MESSAGE, TOKEN_REJECTED, LOGOUT_SUCCESS, SHOW_MESSAGE } from '../actions/actions'
 
 const initialState = {
 	open: false,
@@ -10,6 +10,7 @@ export default function MessageCenterReducer (state = initialState, action) {
 		case LOGIN_ERROR:
 		case TOKEN_REJECTED:
 		case LOGOUT_SUCCESS:
+		case SHOW_MESSAGE:
 			return {
 				...state,
 				open: true,

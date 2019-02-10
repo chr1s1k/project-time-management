@@ -15,7 +15,8 @@ module.exports = merge(commonConfig, {
 				pathRewrite: {
 					'^/api': '/project-time-management/public/api/'
 				},
-				secure: false
+				secure: false,
+				changeOrigin: true
 			}
 		},
 		historyApiFallback: true

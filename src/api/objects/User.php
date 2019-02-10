@@ -183,4 +183,35 @@ class User {
 		return password_verify($password, $this->passwordHash);
 	}
 
+	public function getAssignedProjects() {
+		if (is_null($this->id) || is_null($this->connection)) {
+			return array();
+		}
+
+		$query = "SELECT p.id, p.title, p.finished FROM " . $this->tableName . " u JOIN assigned_projects ap ON u.id = ap.user_id JOIN projects p ON p.id = ap.project_id WHERE u.id = :userId";
+
+		$stmt = $this->connection->prepare($query);
+		$stmt->bindParam(':userId', $this->id);
+
+		try {
+			$stmt->execute();
+
+			$projects = array();
+
+			while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				$project = array(
+					"id" => (int) $row["id"],
+					"title" => $row["title"],
+					"finished" => (bool) (int) $row["finished"]
+				);
+				array_push($projects, $project);
+			}
+
+			return $projects;
+
+		} catch (PDOException $e) {
+			var_dump($e->getMessage());
+		}
+	}
+
 }
