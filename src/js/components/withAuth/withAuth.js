@@ -1,10 +1,11 @@
 import React from 'react'
-import { Redirect } from 'react-router-dom'
+// import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import Cookies from 'js-cookie'
+// import jwtDecode from 'jwt-decode'
 
-import { validateToken } from '../../actions/actions'
+import { loginSuccess, showMessage } from '../../actions/actions'
 
 export default function (ComponentRequiredAuth) {
 
@@ -13,46 +14,45 @@ export default function (ComponentRequiredAuth) {
 		static propTypes = {
 			isAuthenticated: PropTypes.bool,
 			isFetching: PropTypes.bool,
-			validateToken: PropTypes.func,
+			history: PropTypes.object,
+			tokenExists: PropTypes.bool,
+			loginSuccess: PropTypes.func,
+			showMessage: PropTypes.func,
+			messageShown: PropTypes.bool,
 		}
 
 		constructor() {
 			super()
-
-			this.state = {
-				isValidatingToken: true
-			}
 		}
 
 		componentDidMount() {
-			const token = Cookies.get('jwt')
+			const token = Cookies.get('token')
 
-			this.props.validateToken(token)
+			if (token) {
+				this.props.loginSuccess(token)
+			} else {
+				this.checkAuth()
+			}
 		}
 
 		componentDidUpdate() {
-			if (!this.props.isFetching && this.state.isValidatingToken) {
-				this.setState({
-					isValidatingToken: false
-				})
-				// pokud neni validni token, tak ho znic
-				if (!this.props.isAuthenticated) {
-					Cookies.remove('jwt')
+			this.checkAuth()
+		}
+
+		checkAuth() {
+			// token neexistuje nebo je nevalidní => přesměruj na login
+			if (!this.props.isAuthenticated && !this.props.tokenExists) {
+				this.props.history.push('/')
+				if (!this.props.messageShown) {
+					this.props.showMessage('Přístup zamítnut. Je potřeba být přihlášen.')
 				}
 			}
 		}
 
 		render() {
-			const { isAuthenticated } = this.props
-
 			// nic nevykresluj, pokud nemám odpověď ze serveru
-			if (this.state.isValidatingToken) {
+			if (!this.props.isAuthenticated) {
 				return null
-			}
-
-			// token neexistuje nebo je nevalidní => přesměruj na login
-			if (!isAuthenticated) {
-				return <Redirect to="/" />
 			}
 
 			// token byl úspěšně ověřen => vykresli "chráněnou" komponentu
@@ -64,11 +64,13 @@ export default function (ComponentRequiredAuth) {
 
 	const mapStateToProps = (state) => ({
 		isAuthenticated: state.auth.isAuthenticated,
-		isFetching: state.auth.isFetching,
+		tokenExists: state.auth.tokenExists,
+		messageShown: state.messageCenter.open,
 	})
 
 	const mapDispatchToProps = (dispatch) => ({
-		validateToken: (token) => dispatch(validateToken(token))
+		loginSuccess: (token) => dispatch(loginSuccess(token)),
+		showMessage: (message) => dispatch(showMessage(message)),
 	})
 
 	return connect(mapStateToProps, mapDispatchToProps)(Authenticate)

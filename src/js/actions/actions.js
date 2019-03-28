@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 import axios from 'axios'
+import jwtDecode from 'jwt-decode'
 
 const handleErrorMessage = (err) => {
 	let errorMessage = ''
@@ -29,12 +30,15 @@ export function requestLogin(credentials) {
 	}
 }
 
-export function loginSuccess(data) {
+export function loginSuccess(token) {
+	const decoded = jwtDecode(token)
+
 	return {
 		type: LOGIN_SUCCESS,
 		isFetching: false,
 		isAuthenticated: true,
-		jwt: data.jwt
+		token: token,
+		data: decoded.data
 	}
 }
 
@@ -53,8 +57,8 @@ export function loginUser(credentials) {
 
 		return axios.post('/api/login.php', credentials)
 			.then((response) => {
-				Cookies.set('jwt', response.data.jwt, { expires: 1 })
-				dispatch(loginSuccess(response.data))
+				Cookies.set('token', response.data.token, { expires: 1 })
+				dispatch(loginSuccess(response.data.token))
 			})
 			.catch((err) => {
 				let errorMessage = handleErrorMessage(err)
@@ -78,20 +82,21 @@ export function requestLogout() {
 	}
 }
 
-export function logoutSuccess() {
+export function logoutSuccess(reason) {
 	return {
 		type: LOGOUT_SUCCESS,
 		isFetching: false,
 		isAuthenticated: false,
-		message: 'Odhlášení proběhlo úspěšně.'
+		message: reason || 'Odhlášení proběhlo úspěšně.'
 	}
 }
 
-export function logoutUser() {
+export function logoutUser(reason = null) {
 	return (dispatch) => {
 		dispatch(requestLogout())
-		Cookies.remove('jwt')
-		dispatch(logoutSuccess())
+		Cookies.remove('token')
+		dispatch(logoutSuccess(reason))
+		dispatch(closeSidebar())
 		dispatch(clearProjects())
 	}
 }
@@ -107,7 +112,7 @@ export function requestValidateToken(token) {
 	return {
 		type: VALIDATE_TOKEN_REQUEST,
 		isFetching: true,
-		jwt: token
+		token: token
 	}
 }
 
@@ -205,6 +210,7 @@ export function hideProgressBar() {
 export const PROJECTS_LOADED = 'PROJECTS_LOADED'
 export const CLEAR_PROJECTS = 'CLEAR_PROJECTS'
 export const PROJECT_CREATED = 'PROJECT_CREATED'
+export const PROJECT_LOADED = 'PROJECT_LOADED'
 
 export function projectsLoaded(projects) {
 	return {
@@ -226,6 +232,13 @@ export function projectCreated(project) {
 	}
 }
 
+export function projectLoaded(project) {
+	return {
+		type: PROJECT_LOADED,
+		project
+	}
+}
+
 export function loadUserProjects(userId) {
 	return (dispatch) => {
 		dispatch(showProgressBar())
@@ -234,14 +247,21 @@ export function loadUserProjects(userId) {
 			params: {
 				userId: userId
 			},
-			withCredentials: true
+			withCredentials: true,
+			// headers: {
+			// 	'Authorization': `Bearer ${Cookies.get('token')}`
+			// }
 		}).then(response => {
 			dispatch(hideProgressBar())
 			dispatch(projectsLoaded(response.data.projects))
 		}).catch(err => {
 			dispatch(hideProgressBar())
 			let errorMessage = handleErrorMessage(err)
-			dispatch(showMessage(errorMessage))
+			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
+				dispatch(logoutUser(errorMessage))
+			} else {
+				dispatch(showMessage(errorMessage))
+			}
 		})
 	}
 }
@@ -261,6 +281,69 @@ export function createProject(project) {
 		}).catch(err => {
 			let errorMessage = handleErrorMessage(err)
 			dispatch(showMessage(errorMessage))
+		})
+	}
+}
+
+export function loadProjectDetail(id) {
+	return (dispatch) => {
+		dispatch(showProgressBar())
+
+		return axios('http://localhost/project-time-management/public/api/getProject.php', {
+			params: {
+				id: id
+			},
+			withCredentials: true
+		}).then(response => {
+			dispatch(hideProgressBar())
+			dispatch(projectLoaded(response.data.project))
+		}).catch(err => {
+			dispatch(hideProgressBar())
+			let errorMessage = handleErrorMessage(err)
+			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
+				dispatch(logoutUser(errorMessage))
+			} else {
+				dispatch(showMessage(errorMessage))
+			}
+		})
+	}
+}
+
+
+
+// akce pro práci s timesheety
+
+export const TIMESHEET_CREATED = 'TIMESHEET_CREATED'
+
+export function timesheetCreated(timesheets, totalHours) {
+	return {
+		type: TIMESHEET_CREATED,
+		timesheets,
+		totalHours,
+	}
+}
+
+export function createTimesheet(timesheet) {
+	return (dispatch) => {
+		dispatch(showProgressBar())
+
+		return axios('/api/createTimesheet.php', {
+			method: 'POST',
+			data: timesheet,
+			withCredentials: true,
+		}).then(response => {
+			dispatch(hideProgressBar())
+			dispatch(timesheetCreated(response.data.project.timesheets, response.data.project.totalHours))
+			dispatch(showMessage(response.data.message))
+			return response
+		}).catch(err => {
+			dispatch(hideProgressBar())
+			let errorMessage = handleErrorMessage(err)
+			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
+				dispatch(logoutUser(errorMessage))
+			} else {
+				dispatch(showMessage(errorMessage))
+			}
 		})
 	}
 }

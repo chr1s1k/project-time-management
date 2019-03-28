@@ -19,7 +19,7 @@ use \Firebase\JWT\JWT;
 // $jwt = isset($data->jwt) ? $data->jwt : null;
 
 // získej JWT z cookie
-$jwt = isset($_COOKIE['jwt']) ? $_COOKIE['jwt'] : null;
+$jwt = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
 if (!is_null($jwt)) {
 	try {

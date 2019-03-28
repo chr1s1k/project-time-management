@@ -5,7 +5,7 @@ import { LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT_SUCCESS, LOGIN_ERROR, TOKEN_REJECT
 const initialState = {
 	isFetching: false,
 	isAuthenticated: false,
-	tokenExists: Cookies.get('jwt') ? true : false,
+	tokenExists: Cookies.get('token') ? true : false,
 }
 
 const AuthReducer = (state = initialState, action) => {
@@ -21,7 +21,8 @@ const AuthReducer = (state = initialState, action) => {
 			return Object.assign({}, state, {
 				isFetching: action.isFetching,
 				isAuthenticated: action.isAuthenticated,
-				tokenExists: action.jwt ? true : false
+				tokenExists: action.token ? true : false,
+				user: action.data
 			})
 
 		case LOGIN_ERROR:

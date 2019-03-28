@@ -8,8 +8,9 @@ header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 include_once "./config/database.php";
+include_once "./objects/Timesheet.php";
 include_once "./objects/Project.php";
-include_once "./objects/User.php";
+include_once "./objects/Utils.php";
 
 include_once "./config/core.php";
 include_once "./libs/php-jwt-master/src/BeforeValidException.php";
@@ -24,27 +25,37 @@ if (!is_null($jwt)) {
 	try {
 		$decoded = JWT::decode($jwt, $key, array('HS256'));
 
-		http_response_code(200);
-
 		$data = json_decode(file_get_contents("php://input"));
-		if (isset($data->title) && $data->title !== "") {
+		if (isset($data->projectId) && is_numeric($data->projectId) && isset($data->userId) && is_numeric($data->userId) && isset($data->hours) && is_numeric($data->hours) && Utils::isValidDate($data->date)) {
+
 			$database = new Database();
 			$db = $database->getConnection();
+			$projectDetail = null;
 
-			$project = new Project($db);
-			$userId = $decoded->data->id;
-			$title = $data->title;
-			$createdProject = $project->create($data->title, $decoded->data->id);
+			$timesheet = new Timesheet($db);
+			$timesheetCreated = $timesheet->create($data->projectId, $data->userId, $data->hours, $data->date, $data->note);
+
+			// když úspěšně vytvoříme novej timesheet, tak rovnou vrátíme všechny existující timesheety pro tento projekt
+			if ($timesheetCreated) {
+				$project = new Project($db);
+				$projectDetail = $project->getDetail($data->projectId);
+
+				http_response_code(200);
+				$message = "Práce byla úspěšně vykázána.";
+			} else {
+				http_response_code(409);
+				$message = "Práci se nepodařilo vykázat, zkuste to prosím znovu.";
+			}
 
 			echo json_encode(array(
-				"message" => "Projekt byl úspěšně vytvořen",
-				"project" => $createdProject
+				"message" => $message,
+				"project" => $projectDetail,
 			));
 
 		} else {
 			http_response_code(400);
 			echo json_encode(array(
-				"message" => "Chybí název projektu."
+				"message" => "Nevalidní vstupní data."
 			));
 		}
 

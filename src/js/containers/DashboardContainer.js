@@ -1,11 +1,18 @@
 import React, { Fragment } from 'react'
 import { connect } from 'react-redux'
-import { withStyles, Typography, Drawer, List, ListItem, Divider, ListItemText, ListItemIcon, Grid, Paper, FormControl, InputLabel, Input, Button } from '@material-ui/core'
+import { withStyles, Typography, Drawer, List, ListItem, Divider, ListItemText, ListItemIcon, Grid, Paper, FormControl, InputLabel, Input, Button, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core'
+import { MuiPickersUtilsProvider, InlineDatePicker } from 'material-ui-pickers'
+import MomentUtils from '@date-io/moment'
+import 'moment/locale/cs'
+import Moment from 'moment'
 import { Link } from 'react-router-dom'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
+import ComputerIcon from '@material-ui/icons/Computer'
+import LockIcon from '@material-ui/icons/Lock'
 import PropTypes from 'prop-types'
 
-import { toggleSidebar, closeSidebar, loadUserProjects, createProject } from '../actions/actions'
+import { toggleSidebar, loadUserProjects, createProject, loadProjectDetail, createTimesheet, timesheetCreated } from '../actions/actions'
+import ResultMessage from '../components/ResultMessage/ResultMessage'
 
 const sidebarWidth = 240
 
@@ -39,6 +46,17 @@ const styles = (theme) => ({
 	},
 	submitBtn: {
 		marginTop: theme.spacing.unit * 2
+	},
+	paperTable: {
+		marginTop: theme.spacing.unit * 2,
+		marginBottom: theme.spacing.unit * 2
+	},
+	vCenter: {
+		display: 'flex',
+		alignItems: 'center',
+	},
+	projectIcon: {
+		marginRight: theme.spacing.unit,
 	}
 })
 
@@ -47,11 +65,19 @@ class DashboardContainer extends React.Component {
 	constructor(props) {
 		super(props)
 
+		this.initialTimesheetState = {
+			date: new Date(),
+			hours: '',
+			note: ''
+		}
+
 		this.state = {
 			showAddForm: false,
 			project: {
 				title: ''
-			}
+			},
+			TimesheetDialogOpened: false,
+			timesheet: this.initialTimesheetState,
 		}
 
 		if (props.location.pathname === '/dashboard/new') {
@@ -60,16 +86,29 @@ class DashboardContainer extends React.Component {
 			})
 		}
 
-		props.toggleSidebar()
+		if (!props.sidebarOpened) {
+			props.toggleSidebar()
+		}
+
+		this.hoursInput = React.createRef()
 	}
 
 	componentDidMount() {
-		this.props.loadUserProjects(this.props.user.id) // načti projekty, ke kterým je přihlášený uživatel přiřazen
+		if (!this.props.projects.length) {
+			this.props.loadUserProjects(this.props.user.id) // načti projekty, ke kterým je přiřazen přihlášený uživatel
+		}
+
+		const projectId = this.props.match.params.projectId
+		if (projectId) {
+			this.props.loadProjectDetail(projectId)
+		}
 	}
 
-	componentWillUnmount() {
-		this.props.closeSidebar()
-	}
+	// componentDidUpdate() {
+	// 	if (this.props.projectCreated && this.props.projectId) {
+	// 		this.props.history.push(`/dashboard/${this.props.projectId}`)
+	// 	}
+	// }
 
 	handleChangeNewProject = (event) => {
 		this.setState({
@@ -89,8 +128,62 @@ class DashboardContainer extends React.Component {
 		}
 	}
 
+	handleOpenTimesheetDialog = () => {
+		this.setState({ TimesheetDialogOpened: true })
+	}
+
+	handleCloseTimesheetDialog = () => {
+		this.setState({ TimesheetDialogOpened: false })
+	}
+
+	handleTimesheetDialogInputChange = (event) => {
+		if (event instanceof Moment) { // zpracuj datum
+			this.setState({
+				timesheet: {
+					...this.state.timesheet,
+					date: new Date(event)
+				}
+			})
+		} else { // zpracuj ostatní inputy
+			this.setState({
+				timesheet: {
+					...this.state.timesheet,
+					[event.target.id]: event.target.value
+				}
+			})
+		}
+	}
+
+	handleSubmitTimesheet = () => {
+		let { timesheet } = this.state
+
+		// validace inputu pro zadání počtu vykázaných hodin
+		if (timesheet.hours.trim() !== '' && parseFloat(timesheet.hours) > 0) {
+			timesheet = Object.assign({}, timesheet, {
+				date: Moment(timesheet.date).format('YYYY-MM-DD'),
+				hours: parseFloat(timesheet.hours),
+				userId: this.props.user.id,
+				projectId: this.props.project.id,
+				note: timesheet.note.trim() !== '' ? timesheet.note : null
+			})
+
+			const created = this.props.createTimesheet(timesheet)
+			created.then(result => {
+				// pokud byl timesheet úspěšně vytvořen, tak zavři dialog a vyresetuj formulář (state)
+				if (result && result.statusText.toLowerCase() === 'ok') {
+					this.setState({
+						TimesheetDialogOpened: false,
+						timesheet: this.initialTimesheetState,
+					})
+				}
+			})
+		} else {
+			this.hoursInput.current.focus()
+		}
+	}
+
 	render() {
-		const { classes, sidebarOpened, projects } = this.props
+		const { classes, sidebarOpened, projects, project, user } = this.props
 
 		return (
 			<Fragment>
@@ -107,17 +200,17 @@ class DashboardContainer extends React.Component {
 						</ListItemText>
 					</ListItem>
 					<List>
+						<ListItem button component={Link} to="/dashboard/new">
+							<ListItemIcon className={classes.sideBarIcon}><AddCircleIcon /></ListItemIcon>
+							<ListItemText primary="Přidat projekt" />
+						</ListItem>
+						<Divider />
 						{projects.map((project) => (
 							<ListItem button key={project.id} component={Link} to={`/dashboard/${project.id}`}>
 								<ListItemText primary={project.title} />
 							</ListItem>
 						))}
 					</List>
-					<Divider />
-					<ListItem button component={Link} to="/dashboard/new">
-						<ListItemIcon className={classes.sideBarIcon}><AddCircleIcon /></ListItemIcon>
-						<ListItemText primary="Přidat projekt" />
-					</ListItem>
 				</Drawer>
 				<main className={sidebarOpened ? `${classes.content} ${classes.contentShrinked}` : classes.content}>
 					{this.state.showAddForm ? (
@@ -149,8 +242,146 @@ class DashboardContainer extends React.Component {
 								</Paper>
 							</Grid>
 						</Grid>
+
 					) : (
-						<Typography variant="h5">Začněte vybráním projektu vlevo nebo přidejte nový.</Typography>
+
+						<Fragment>
+							{project ? (
+								<Fragment>
+									<Typography component="h1" variant="h4" className={classes.vCenter} gutterBottom>
+										<ComputerIcon fontSize="large" className={classes.projectIcon} />
+										<span>{project.title}</span>
+									</Typography>
+									<Typography variant="subtitle2" color="textSecondary" gutterBottom>Projekt založen <strong>{project.created}</strong> uživatelem <strong>{project.createdBy ? project.createdBy : 'N/A'}</strong>.</Typography>
+									{project.finished &&
+										<ResultMessage
+											variant="warning"
+											message="Na projekt již není možné vykazovat."
+										/>
+									}
+									<Paper className={classes.paperTable}>
+										<Table>
+											<TableHead>
+												<TableRow>
+													<TableCell>Datum</TableCell>
+													<TableCell>Uživatel</TableCell>
+													<TableCell>Poznámka</TableCell>
+													<TableCell align="right">Počet hodin</TableCell>
+												</TableRow>
+											</TableHead>
+											<TableFooter>
+												<TableRow hover>
+													<TableCell colSpan={3} component="th" scope="col">Celkem vykázáno:</TableCell>
+													<TableCell align="right">
+														<Typography variant="h6">{project.totalHours} h</Typography>
+													</TableCell>
+												</TableRow>
+											</TableFooter>
+											<TableBody>
+												{project.timesheets.map(timesheet => <TableRow key={timesheet.id} hover>
+													<TableCell>{timesheet.date}</TableCell>
+													<TableCell>{timesheet.worker}</TableCell>
+													<TableCell>{timesheet.note}</TableCell>
+													<TableCell align="right">{timesheet.hours} h</TableCell>
+												</TableRow>)}
+											</TableBody>
+										</Table>
+									</Paper>
+									{project.finished ?
+										<Typography variant="subtitle2" color="textSecondary" className={classes.vCenter} gutterBottom>
+											<LockIcon fontSize="small" className={classes.projectIcon} />
+											<span>Projekt uzavřen uživatelem <strong>{project.finishedBy ? project.finishedBy : 'N/A'}</strong>.</span>
+										</Typography>
+										: <Fragment>
+											<Button
+												type="button"
+												variant="outlined"
+												onClick={this.handleOpenTimesheetDialog}
+											>Vykázat práci</Button>
+											<Dialog open={this.state.TimesheetDialogOpened} maxWidth="xs" fullWidth aria-labelledby="form-dialog-title">
+												<DialogTitle id="form-dialog-title">Vykázání práce</DialogTitle>
+												<DialogContent>
+													<TextField
+														margin="normal"
+														id="fullName"
+														label="Uživatel"
+														type="text"
+														defaultValue={`${user.firstName} ${user.lastName}`}
+														InputProps={{
+															readOnly: true,
+														}}
+														fullWidth
+													/>
+													<TextField
+														margin="normal"
+														id="projectTitle"
+														label="Projekt"
+														type="text"
+														defaultValue={project.title}
+														InputProps={{
+															readOnly: true,
+														}}
+														fullWidth
+													/>
+													<MuiPickersUtilsProvider utils={MomentUtils}>
+														<InlineDatePicker
+															margin="normal"
+															id="date"
+															label="Datum"
+															format="DD.MM.YYYY"
+															value={this.state.timesheet.date}
+															autoOk
+															fullWidth
+															required
+															onChange={this.handleTimesheetDialogInputChange}
+														/>
+													</MuiPickersUtilsProvider>
+													<TextField
+														autoFocus
+														margin="normal"
+														id="hours"
+														label="Počet hodin"
+														type="number"
+														value={this.state.timesheet.hours}
+														inputRef={this.hoursInput}
+														fullWidth
+														required
+														onChange={this.handleTimesheetDialogInputChange}
+													/>
+													<TextField
+														margin="normal"
+														id="note"
+														label="Poznámka"
+														type="text"
+														value={this.state.timesheet.note}
+														multiline
+														rows={3}
+														fullWidth
+														onChange={this.handleTimesheetDialogInputChange}
+													/>
+												</DialogContent>
+												<DialogActions>
+													<Button
+														type="button"
+														variant="contained"
+														color="primary"
+														disabled={this.props.isLoading}
+														onClick={this.handleSubmitTimesheet}
+													>Vykázat</Button>
+													<Button
+														type="button"
+														variant="text"
+														onClick={this.handleCloseTimesheetDialog}
+													>Zavřít</Button>
+												</DialogActions>
+											</Dialog>
+										</Fragment>
+									}
+								</Fragment>
+							) : (
+								<Typography variant="h5">Začněte vybráním projektu vlevo nebo přidejte nový.</Typography>
+							)}
+						</Fragment>
 					)}
 				</main>
 			</Fragment>
@@ -164,17 +395,21 @@ function mapStateToProps(state) {
 		isAuthenticated: state.auth.isAuthenticated,
 		sidebarOpened: state.sidebar.opened,
 		user: state.auth.user,
-		projects: state.projects,
-		isLoading: state.progressBar.isVisible,
+		projects: state.projects.projects,
+		isLoading: state.progressBar.isVisible || state.auth.isFetching,
+		projectCreated: state.projects.created,
+		projectId: state.projects.id,
+		project: state.projects.project,
 	}
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
 		toggleSidebar: () => dispatch(toggleSidebar()),
-		closeSidebar: () => dispatch(closeSidebar()),
 		loadUserProjects: (userId) => dispatch(loadUserProjects(userId)),
 		createProject: (project) => dispatch(createProject(project)),
+		loadProjectDetail: (projectId) => dispatch(loadProjectDetail(projectId)),
+		createTimesheet: (timesheet) => dispatch(createTimesheet(timesheet)),
 	}
 }
 
@@ -184,13 +419,18 @@ DashboardContainer.propTypes = {
 	classes: PropTypes.object,
 	sidebarOpened: PropTypes.bool,
 	toggleSidebar: PropTypes.func,
-	closeSidebar: PropTypes.func,
 	loadUserProjects: PropTypes.func,
 	user: PropTypes.object,
 	projects: PropTypes.array,
 	location: PropTypes.object,
 	isLoading: PropTypes.bool,
 	createProject: PropTypes.func,
+	projectCreated: PropTypes.bool,
+	projectId: PropTypes.number,
+	match: PropTypes.object,
+	loadProjectDetail: PropTypes.func,
+	project: PropTypes.object,
+	createTimesheet: PropTypes.func,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DashboardContainer))

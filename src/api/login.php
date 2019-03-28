@@ -38,7 +38,7 @@ if (!is_null($data)) {
 			// "nbf" => $nbf,
 			"exp" => $exp,
 			"data" => array(
-				"id" => $user->getId(),
+				"id" => (int) $user->getId(),
 				"firstName" => $user->getFirstName(),
 				"lastName" => $user->getLastName(),
 				"username" => $user->getUsername(),
@@ -53,7 +53,7 @@ if (!is_null($data)) {
 
 		echo json_encode(array(
 			"message" => "Přihlášení proběhlo úspěšně.",
-			"jwt" => $jwt
+			"token" => $jwt
 			)
 		);
 
