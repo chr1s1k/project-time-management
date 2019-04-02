@@ -11,7 +11,7 @@ import ComputerIcon from '@material-ui/icons/Computer'
 import LockIcon from '@material-ui/icons/Lock'
 import PropTypes from 'prop-types'
 
-import { toggleSidebar, loadUserProjects, createProject, loadProjectDetail, createTimesheet, timesheetCreated } from '../actions/actions'
+import { toggleSidebar, loadUserProjects, createProject, loadProjectDetail, createTimesheet } from '../actions/actions'
 import ResultMessage from '../components/ResultMessage/ResultMessage'
 
 const sidebarWidth = 240
@@ -57,6 +57,9 @@ const styles = (theme) => ({
 	},
 	projectIcon: {
 		marginRight: theme.spacing.unit,
+	},
+	projectFinished: {
+		color: '#eee',
 	}
 })
 
@@ -207,7 +210,14 @@ class DashboardContainer extends React.Component {
 						<Divider />
 						{projects.map((project) => (
 							<ListItem button key={project.id} component={Link} to={`/dashboard/${project.id}`}>
-								<ListItemText primary={project.title} />
+								<ListItemText primary={
+									<Typography variant="subtitle1" color={project.finished ? 'textSecondary' : 'default' } className={classes.vCenter}>
+										{project.finished &&
+											<LockIcon fontSize="small" className={classes.projectIcon} />
+										}
+										<span>{project.title}</span>
+									</Typography>
+								} />
 							</ListItem>
 						))}
 					</List>
@@ -250,7 +260,7 @@ class DashboardContainer extends React.Component {
 								<Fragment>
 									<Typography component="h1" variant="h4" className={classes.vCenter} gutterBottom>
 										<ComputerIcon fontSize="large" className={classes.projectIcon} />
-										<span>{project.title}</span>
+										<span>{project.title ? project.title : 'N/A'}</span>
 									</Typography>
 									<Typography variant="subtitle2" color="textSecondary" gutterBottom>Projekt založen <strong>{project.created}</strong> uživatelem <strong>{project.createdBy ? project.createdBy : 'N/A'}</strong>.</Typography>
 									{project.finished &&
@@ -278,7 +288,7 @@ class DashboardContainer extends React.Component {
 												</TableRow>
 											</TableFooter>
 											<TableBody>
-												{project.timesheets.map(timesheet => <TableRow key={timesheet.id} hover>
+												{project.timesheets && project.timesheets.map(timesheet => <TableRow key={timesheet.id} hover>
 													<TableCell>{timesheet.date}</TableCell>
 													<TableCell>{timesheet.worker}</TableCell>
 													<TableCell>{timesheet.note}</TableCell>
@@ -299,81 +309,83 @@ class DashboardContainer extends React.Component {
 												onClick={this.handleOpenTimesheetDialog}
 											>Vykázat práci</Button>
 											<Dialog open={this.state.TimesheetDialogOpened} maxWidth="xs" fullWidth aria-labelledby="form-dialog-title">
-												<DialogTitle id="form-dialog-title">Vykázání práce</DialogTitle>
-												<DialogContent>
-													<TextField
-														margin="normal"
-														id="fullName"
-														label="Uživatel"
-														type="text"
-														defaultValue={`${user.firstName} ${user.lastName}`}
-														InputProps={{
-															readOnly: true,
-														}}
-														fullWidth
-													/>
-													<TextField
-														margin="normal"
-														id="projectTitle"
-														label="Projekt"
-														type="text"
-														defaultValue={project.title}
-														InputProps={{
-															readOnly: true,
-														}}
-														fullWidth
-													/>
-													<MuiPickersUtilsProvider utils={MomentUtils}>
-														<InlineDatePicker
+												<form method="post">
+													<DialogTitle id="form-dialog-title">Vykázání práce</DialogTitle>
+													<DialogContent>
+														<TextField
 															margin="normal"
-															id="date"
-															label="Datum"
-															format="DD.MM.YYYY"
-															value={this.state.timesheet.date}
-															autoOk
+															id="fullName"
+															label="Uživatel"
+															type="text"
+															defaultValue={`${user.firstName} ${user.lastName}`}
+															InputProps={{
+																readOnly: true,
+															}}
+															fullWidth
+														/>
+														<TextField
+															margin="normal"
+															id="projectTitle"
+															label="Projekt"
+															type="text"
+															defaultValue={project.title}
+															InputProps={{
+																readOnly: true,
+															}}
+															fullWidth
+														/>
+														<MuiPickersUtilsProvider utils={MomentUtils}>
+															<InlineDatePicker
+																margin="normal"
+																id="date"
+																label="Datum"
+																format="DD.MM.YYYY"
+																value={this.state.timesheet.date}
+																autoOk
+																fullWidth
+																required
+																onChange={this.handleTimesheetDialogInputChange}
+															/>
+														</MuiPickersUtilsProvider>
+														<TextField
+															autoFocus
+															margin="normal"
+															id="hours"
+															label="Počet hodin"
+															type="number"
+															value={this.state.timesheet.hours}
+															inputRef={this.hoursInput}
 															fullWidth
 															required
 															onChange={this.handleTimesheetDialogInputChange}
 														/>
-													</MuiPickersUtilsProvider>
-													<TextField
-														autoFocus
-														margin="normal"
-														id="hours"
-														label="Počet hodin"
-														type="number"
-														value={this.state.timesheet.hours}
-														inputRef={this.hoursInput}
-														fullWidth
-														required
-														onChange={this.handleTimesheetDialogInputChange}
-													/>
-													<TextField
-														margin="normal"
-														id="note"
-														label="Poznámka"
-														type="text"
-														value={this.state.timesheet.note}
-														multiline
-														rows={3}
-														fullWidth
-														onChange={this.handleTimesheetDialogInputChange}
-													/>
-												</DialogContent>
-												<DialogActions>
-													<Button
-														type="button"
-														variant="contained"
-														color="primary"
-														disabled={this.props.isLoading}
-														onClick={this.handleSubmitTimesheet}
-													>Vykázat</Button>
-													<Button
-														type="button"
-														variant="text"
-														onClick={this.handleCloseTimesheetDialog}
-													>Zavřít</Button>
-												</DialogActions>
+														<TextField
+															margin="normal"
+															id="note"
+															label="Poznámka"
+															type="text"
+															value={this.state.timesheet.note}
+															multiline
+															rows={3}
+															fullWidth
+															onChange={this.handleTimesheetDialogInputChange}
+														/>
+													</DialogContent>
+													<DialogActions>
+														<Button
+															type="submit"
+															variant="contained"
+															color="primary"
+															disabled={this.props.isLoading}
+															onClick={this.handleSubmitTimesheet}
+														>Vykázat</Button>
+														<Button
+															type="button"
+															variant="text"
+															onClick={this.handleCloseTimesheetDialog}
+														>Zavřít</Button>
+													</DialogActions>
+												</form>
 											</Dialog>
 										</Fragment>
 									}

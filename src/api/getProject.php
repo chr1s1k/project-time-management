@@ -26,6 +26,7 @@ if (!is_null($jwt)) {
 		http_response_code(200);
 
 		$projectId = isset($_GET['id']) && is_numeric($_GET['id']) ? $_GET['id'] : null;
+		$userId = $decoded->data->id;
 
 		if (!is_null($projectId)) {
 
@@ -33,7 +34,7 @@ if (!is_null($jwt)) {
 			$db = $database->getConnection();
 
 			$project = new Project($db);
-			$projectDetail = $project->getDetail($projectId);
+			$projectDetail = $project->getDetail($projectId, $userId); // získej detaily o projektu, ale s timesheety pouze pro specifického uživatele
 
 			echo json_encode(array(
 				"project" => $projectDetail

@@ -156,67 +156,73 @@ class Project {
 		}
 	}
 
-	public function getDetail($id) {
+	public function getDetail($id, $userId = null) {
 		if (is_null($this->connection) || !is_numeric($id)) {
 			return false;
 		}
 
-		$query = "SELECT
+		$projectQuery = "SELECT
 		p.id,
 		p.title,
 		p.created,
 		p.finished,
 		CONCAT(u1.firstName, ' ', u1.lastName) as finishedBy,
-		CONCAT(u.firstName, ' ', u.lastName) as createdBy,
-		t.id AS timesheetId,
-		CONCAT(u2.firstName, ' ', u2.lastName) as worker,
-		t.hours,
-		t.date,
-		t.note
+		CONCAT(u.firstName, ' ', u.lastName) as createdBy
 		FROM " . $this->tableName . " p
 		LEFT JOIN users u ON p.createdBy = u.id
 		LEFT JOIN users u1 ON p.finishedBy = u1.id
-		LEFT JOIN timesheets t ON p.id = t.project_id
-		LEFT JOIN users u2 ON t.user_id = u2.id
-		WHERE p.id = :projectId
-		ORDER BY t.date ASC";
+		WHERE p.id = :projectId";
 
-		$stmt = $this->connection->prepare($query);
+		$stmt = $this->connection->prepare($projectQuery);
 		$stmt->bindParam(':projectId', $id);
+
+		$timesheetsQuery = "SELECT
+		t.id,
+		t.hours,
+		t.date,
+		t.note,
+		CONCAT(u.firstName, ' ', u.lastName) as worker
+		FROM timesheets t
+		JOIN users u ON u.id = t.user_id
+		WHERE t.project_id = :projectId " . (!is_null($userId) ? "AND t.user_id = :userId " : "") .
+		"ORDER BY t.date ASC";
+
+		$stmt2 = $this->connection->prepare($timesheetsQuery);
+		$stmt2->bindParam(':projectId', $id);
+		if (!is_null($userId)) {
+			$stmt2->bindParam(':userId', $userId);
+		}
 
 		try {
 			$stmt->execute();
+			$stmt2->execute();
 
 			$totalHours = 0;
 			$timesheet = array();
 			$timesheets = array();
-			$i = 0;
 
-			while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				// meta informace o projektu
-				if ($i === 0) {
-					$projectDetail = array(
-						'id' => (int) $row['id'],
-						'title' => $row['title'],
-						'created' => date('j.n.Y', $row['created']),
-						'finished' => (bool) (int) $row['finished'],
-						'finishedBy' => $row['finishedBy'],
-						'createdBy' => $row['createdBy'],
-					);
-				}
-				// timesheety, pouze pokud nějaké existují (je vykázáno na projektu)
-				if (!is_null($row['timesheetId'])) {
-					$timesheet = array(
-						'id' => (int) $row['timesheetId'],
-						'worker' => $row['worker'],
-						'hours' => (float) $row['hours'],
-						'date' => date('j.n.Y', strtotime($row['date'])),
-						'note' => $row['note'],
-					);
-					array_push($timesheets, $timesheet);
-					$totalHours += (float) $row['hours']; // udělej součet všech vykázaných hodin na projektu
-				}
-				$i++;
+			// meta informace o projektu
+			$row = $stmt->fetch(PDO::FETCH_ASSOC);
+			$projectDetail = array(
+				'id' => (int) $row['id'],
+				'title' => $row['title'],
+				'created' => date('j.n.Y', $row['created']),
+				'finished' => (bool) (int) $row['finished'],
+				'finishedBy' => $row['finishedBy'],
+				'createdBy' => $row['createdBy'],
+			);
+
+			// timesheety vykázané na projektu
+			while ($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+				$timesheet = array(
+					'id' => (int) $row['id'],
+					'worker' => $row['worker'],
+					'hours' => (float) $row['hours'],
+					'date' => date('j.n.Y', strtotime($row['date'])),
+					'note' => $row['note'],
+				);
+				array_push($timesheets, $timesheet);
+				$totalHours += (float) $row['hours']; // udělej součet všech vykázaných hodin na projektu
 			}
 
 			$projectDetail['timesheets'] = $timesheets; // přidej timesheetové pole do detailu o projektu

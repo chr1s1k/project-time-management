@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 02, 2019 at 01:51 PM
+-- Generation Time: Apr 02, 2019 at 02:09 PM
 -- Server version: 5.7.14
 -- PHP Version: 5.6.25
 
@@ -67,7 +67,10 @@ INSERT INTO `assigned_projects` (`id`, `project_id`, `user_id`) VALUES
 (27, 30, 1),
 (28, 31, 1),
 (29, 34, 1),
-(30, 35, 1);
+(30, 35, 1),
+(31, 11, 3),
+(32, 1, 3),
+(33, 13, 3);
 
 -- --------------------------------------------------------
 
@@ -97,9 +100,7 @@ INSERT INTO `projects` (`id`, `title`, `created`, `createdBy`, `finished`, `fini
 (14, 'Koupit Janičce nové šaty!', '1549817654', 1, 0, NULL),
 (21, 'Bla', '1553532316', 1, 0, NULL),
 (24, 'Test 18', '1553532468', 1, 0, NULL),
-(32, 'Vykoupat hydru', '1553808760', 1, 0, NULL),
 (35, 'Copánky', '1553815795', 1, 0, NULL),
-(33, 'Vykoupat hydru', '1553808771', 1, 0, NULL),
 (34, 'Vykoupat hydru', '1553808808', 1, 0, NULL);
 
 -- --------------------------------------------------------
@@ -151,7 +152,8 @@ INSERT INTO `timesheets` (`id`, `project_id`, `user_id`, `hours`, `date`, `note`
 (28, 34, 1, 6, '2019-03-28', NULL, '1553810668'),
 (29, 34, 1, 1, '2019-03-28', NULL, '1553810765'),
 (30, 34, 1, 2, '2019-03-29', 'Test poznámky', '1553815767'),
-(31, 35, 1, 1, '2019-03-29', 'Od mého krásného tulipánka :-*', '1553815812');
+(31, 35, 1, 1, '2019-03-29', 'Od mého krásného tulipánka :-*', '1553815812'),
+(32, 1, 3, 3, '2019-04-02', 'Od Šimona ;)', '1554214117');
 
 -- --------------------------------------------------------
 
@@ -175,7 +177,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `firstName`, `lastName`, `username`, `password`, `role`) VALUES
 (1, 'Radek', 'Sukup', 'test', '$2y$10$m51hDBjUEua6aTz3rkEdn.FBSBFAudwI7zpFlCWeIYxA0MsU4OTCa', 'worker'),
-(2, 'Jaroslav', 'Vomáčka', 'manager', '$2y$10$m51hDBjUEua6aTz3rkEdn.FBSBFAudwI7zpFlCWeIYxA0MsU4OTCa', 'administrator');
+(2, 'Jaroslav', 'Vomáčka', 'manager', '$2y$10$m51hDBjUEua6aTz3rkEdn.FBSBFAudwI7zpFlCWeIYxA0MsU4OTCa', 'administrator'),
+(3, 'Šimon', 'Pánev', 'test2', '$2y$10$m51hDBjUEua6aTz3rkEdn.FBSBFAudwI7zpFlCWeIYxA0MsU4OTCa', 'worker');
 
 --
 -- Indexes for dumped tables
@@ -213,7 +216,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `assigned_projects`
 --
 ALTER TABLE `assigned_projects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 --
 -- AUTO_INCREMENT for table `projects`
 --
@@ -223,12 +226,12 @@ ALTER TABLE `projects`
 -- AUTO_INCREMENT for table `timesheets`
 --
 ALTER TABLE `timesheets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

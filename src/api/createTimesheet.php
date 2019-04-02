@@ -35,10 +35,10 @@ if (!is_null($jwt)) {
 			$timesheet = new Timesheet($db);
 			$timesheetCreated = $timesheet->create($data->projectId, $data->userId, $data->hours, $data->date, $data->note);
 
-			// když úspěšně vytvoříme novej timesheet, tak rovnou vrátíme všechny existující timesheety pro tento projekt
+			// když úspěšně vytvoříme novej timesheet, tak rovnou vrátíme všechny existující timesheety pro tento projekt a pro daného uživatele
 			if ($timesheetCreated) {
 				$project = new Project($db);
-				$projectDetail = $project->getDetail($data->projectId);
+				$projectDetail = $project->getDetail($data->projectId, $data->userId);
 
 				http_response_code(200);
 				$message = "Práce byla úspěšně vykázána.";
