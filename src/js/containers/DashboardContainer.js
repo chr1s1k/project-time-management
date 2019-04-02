@@ -11,7 +11,7 @@ import ComputerIcon from '@material-ui/icons/Computer'
 import LockIcon from '@material-ui/icons/Lock'
 import PropTypes from 'prop-types'
 
-import { toggleSidebar, loadUserProjects, createProject, loadProjectDetail, createTimesheet } from '../actions/actions'
+import { toggleSidebar, loadUserProjects, createProject, loadProjectDetail, createTimesheet, clearProject } from '../actions/actions'
 import ResultMessage from '../components/ResultMessage/ResultMessage'
 
 const sidebarWidth = 240
@@ -77,9 +77,10 @@ class DashboardContainer extends React.Component {
 		this.state = {
 			showAddForm: false,
 			project: {
-				title: ''
+				title: '',
+				// created: false,
 			},
-			TimesheetDialogOpened: false,
+			timesheetDialogOpened: false,
 			timesheet: this.initialTimesheetState,
 		}
 
@@ -107,11 +108,15 @@ class DashboardContainer extends React.Component {
 		}
 	}
 
-	// componentDidUpdate() {
-	// 	if (this.props.projectCreated && this.props.projectId) {
-	// 		this.props.history.push(`/dashboard/${this.props.projectId}`)
-	// 	}
-	// }
+	componentDidUpdate() {
+		if (this.props.projectCreated && this.props.projectId) {
+			this.props.history.push(`/dashboard/${this.props.projectId}`)
+		}
+	}
+
+	componentWillUnmount() {
+		this.props.clearProject()
+	}
 
 	handleChangeNewProject = (event) => {
 		this.setState({
@@ -132,11 +137,11 @@ class DashboardContainer extends React.Component {
 	}
 
 	handleOpenTimesheetDialog = () => {
-		this.setState({ TimesheetDialogOpened: true })
+		this.setState({ timesheetDialogOpened: true })
 	}
 
 	handleCloseTimesheetDialog = () => {
-		this.setState({ TimesheetDialogOpened: false })
+		this.setState({ timesheetDialogOpened: false })
 	}
 
 	handleTimesheetDialogInputChange = (event) => {
@@ -175,7 +180,7 @@ class DashboardContainer extends React.Component {
 				// pokud byl timesheet úspěšně vytvořen, tak zavři dialog a vyresetuj formulář (state)
 				if (result && result.statusText.toLowerCase() === 'ok') {
 					this.setState({
-						TimesheetDialogOpened: false,
+						timesheetDialogOpened: false,
 						timesheet: this.initialTimesheetState,
 					})
 				}
@@ -308,7 +313,7 @@ class DashboardContainer extends React.Component {
 												variant="outlined"
 												onClick={this.handleOpenTimesheetDialog}
 											>Vykázat práci</Button>
-											<Dialog open={this.state.TimesheetDialogOpened} maxWidth="xs" fullWidth aria-labelledby="form-dialog-title">
+											<Dialog open={this.state.timesheetDialogOpened} maxWidth="xs" fullWidth aria-labelledby="form-dialog-title">
 												<form method="post">
 													<DialogTitle id="form-dialog-title">Vykázání práce</DialogTitle>
 													<DialogContent>
@@ -422,6 +427,7 @@ function mapDispatchToProps(dispatch) {
 		createProject: (project) => dispatch(createProject(project)),
 		loadProjectDetail: (projectId) => dispatch(loadProjectDetail(projectId)),
 		createTimesheet: (timesheet) => dispatch(createTimesheet(timesheet)),
+		clearProject: () => dispatch(clearProject()),
 	}
 }
 
@@ -443,6 +449,7 @@ DashboardContainer.propTypes = {
 	loadProjectDetail: PropTypes.func,
 	project: PropTypes.object,
 	createTimesheet: PropTypes.func,
+	clearProject: PropTypes.func,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DashboardContainer))

@@ -211,6 +211,7 @@ export const PROJECTS_LOADED = 'PROJECTS_LOADED'
 export const CLEAR_PROJECTS = 'CLEAR_PROJECTS'
 export const PROJECT_CREATED = 'PROJECT_CREATED'
 export const PROJECT_LOADED = 'PROJECT_LOADED'
+export const CLEAR_PROJECT = 'CLEAR_PROJECT'
 
 export function projectsLoaded(projects) {
 	return {
@@ -236,6 +237,12 @@ export function projectLoaded(project) {
 	return {
 		type: PROJECT_LOADED,
 		project
+	}
+}
+
+export function clearProject() {
+	return {
+		type: CLEAR_PROJECT
 	}
 }
 

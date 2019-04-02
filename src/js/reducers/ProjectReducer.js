@@ -1,4 +1,4 @@
-import { PROJECTS_LOADED, CLEAR_PROJECTS, PROJECT_CREATED, PROJECT_LOADED, TIMESHEET_CREATED } from '../actions/actions'
+import { PROJECTS_LOADED, CLEAR_PROJECTS, PROJECT_CREATED, PROJECT_LOADED, TIMESHEET_CREATED, CLEAR_PROJECT } from '../actions/actions'
 
 const initialState = {
 	projects: [],
@@ -38,6 +38,13 @@ const ProjectReducer = (state = initialState, action) => {
 					timesheets: action.timesheets,
 					totalHours: action.totalHours
 				})
+			}
+
+		case CLEAR_PROJECT:
+			return {
+				...state,
+				created: false,
+				id: null
 			}
 
 		case CLEAR_PROJECTS:
