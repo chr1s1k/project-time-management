@@ -37,7 +37,7 @@ if (!is_null($jwt)) {
 			$createdProject = $project->create($data->title, $decoded->data->id);
 
 			echo json_encode(array(
-				"message" => "Projekt byl úspěšně vytvořen",
+				"message" => "Projekt byl úspěšně vytvořen.",
 				"project" => $createdProject
 			));
 

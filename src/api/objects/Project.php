@@ -185,7 +185,7 @@ class Project {
 		FROM timesheets t
 		JOIN users u ON u.id = t.user_id
 		WHERE t.project_id = :projectId " . (!is_null($userId) ? "AND t.user_id = :userId " : "") .
-		"ORDER BY t.date ASC";
+		"ORDER BY t.date, t.created ASC";
 
 		$stmt2 = $this->connection->prepare($timesheetsQuery);
 		$stmt2->bindParam(':projectId', $id);

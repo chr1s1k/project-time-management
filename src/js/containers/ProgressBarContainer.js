@@ -12,7 +12,7 @@ const styles = (theme) => ({
 		visibility: 'visible'
 	},
 	progressBar: {
-		backgroundColor: '#999'
+		backgroundColor: '#fff'
 	},
 })
 
@@ -21,7 +21,7 @@ function ProgressBarContainer(props) {
 
 	return (
 		<LinearProgress
-			color="primary"
+			color="secondary"
 			classes={{
 				root: classes.default,
 				bar1Indeterminate: classes.progressBar,

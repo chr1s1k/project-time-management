@@ -218,7 +218,6 @@ class User {
 			return $projects;
 
 		} catch (PDOException $e) {
-			// var_dump($e->getMessage());
 			return array();
 		}
 	}

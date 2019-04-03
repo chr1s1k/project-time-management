@@ -188,4 +188,24 @@ class Timesheet {
 		}
 	}
 
+	public function delete($timesheetId, $userId) {
+		if (is_null($this->connection)) {
+			return false;
+		}
+
+		$query = "DELETE FROM " . $this->tableName . " WHERE id = :timesheetId AND user_id = :userId";
+
+		$stmt = $this->connection->prepare($query);
+		$stmt->bindParam(':timesheetId', $timesheetId);
+		$stmt->bindParam(':userId', $userId);
+
+		try {
+			$stmt->execute();
+			$count = $stmt->rowCount(); // vrátí počet řádků
+			return (bool) $count;
+		} catch (PDOException $e) {
+			return false;
+		}
+	}
+
 }

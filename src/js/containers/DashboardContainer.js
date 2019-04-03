@@ -54,8 +54,11 @@ const styles = (theme) => ({
 		marginTop: theme.spacing.unit,
 		marginBottom: theme.spacing.unit
 	},
-	submitBtn: {
+	actionZone: {
 		marginTop: theme.spacing.unit * 2
+	},
+	actionZoneBtn: {
+		marginRight: theme.spacing.unit
 	},
 	paperTable: {
 		marginTop: theme.spacing.unit * 2,
@@ -205,7 +208,7 @@ class DashboardContainer extends React.Component {
 	}
 
 	handleDeleteTimesheet = (id) => {
-		this.props.deleteTimesheet(id)
+		this.props.deleteTimesheet(id, this.props.project.id)
 	}
 
 	render() {
@@ -263,14 +266,22 @@ class DashboardContainer extends React.Component {
 												onChange={this.handleChangeNewProject} />
 										</FormControl>
 
-										<Button
-											type="submit"
-											variant="contained"
-											color="primary"
-											disabled={this.props.isLoading}
-											className={classes.submitBtn}
-											onClick={this.handleSubmitAddForm}
-										>Přidat</Button>
+										<div className={classes.actionZone}>
+											<Button
+												type="submit"
+												variant="contained"
+												color="primary"
+												disabled={this.props.isLoading}
+												className={classes.actionZoneBtn}
+												onClick={this.handleSubmitAddForm}
+											>Přidat</Button>
+											<Button
+												variant="outlined"
+												component={Link}
+												to="/dashboard"
+												className={classes.actionZoneBtn}
+											>Zrušit</Button>
+										</div>
 									</form>
 								</Paper>
 							</Grid>
@@ -453,7 +464,7 @@ function mapDispatchToProps(dispatch) {
 		loadProjectDetail: (projectId) => dispatch(loadProjectDetail(projectId)),
 		createTimesheet: (timesheet) => dispatch(createTimesheet(timesheet)),
 		clearProject: () => dispatch(clearProject()),
-		deleteTimesheet: (id) => dispatch(deleteTimesheet(id)),
+		deleteTimesheet: (id, projectId) => dispatch(deleteTimesheet(id, projectId)),
 	}
 }
 

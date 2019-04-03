@@ -331,10 +331,11 @@ export function timesheetCreated(timesheets, totalHours) {
 	}
 }
 
-export function timesheetDeleted(id) {
+export function timesheetDeleted(timesheets, totalHours) {
 	return {
 		type: TIMESHEET_DELETED,
-		id
+		timesheets,
+		totalHours,
 	}
 }
 
@@ -363,18 +364,20 @@ export function createTimesheet(timesheet) {
 	}
 }
 
-export function deleteTimesheet(id) {
+export function deleteTimesheet(id, projectId) {
 	return (dispatch) => {
-		dispatch(showProgressBar)
+		dispatch(showProgressBar())
 
 		return axios('http://localhost/project-time-management/public/api/deleteTimesheet.php', {
 			method: 'DELETE',
 			params: {
-				id: id
-			}
+				id: id,
+				projectId: projectId
+			},
+			withCredentials: true
 		}).then(response => {
 			dispatch(hideProgressBar())
-			dispatch(timesheetDeleted(id))
+			dispatch(timesheetDeleted(response.data.project.timesheets, response.data.project.totalHours))
 			dispatch(showMessage(response.data.message))
 		}).catch(err => {
 			dispatch(hideProgressBar())
