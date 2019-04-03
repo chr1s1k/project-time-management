@@ -188,7 +188,15 @@ class User {
 			return array();
 		}
 
-		$query = "SELECT p.id, p.title, p.finished FROM " . $this->tableName . " u JOIN assigned_projects ap ON u.id = ap.user_id JOIN projects p ON p.id = ap.project_id WHERE u.id = :userId ORDER BY p.finished ASC";
+		$query = "SELECT
+		p.id,
+		p.title,
+		p.finished
+		FROM " . $this->tableName . " u
+		JOIN assigned_projects ap ON u.id = ap.user_id
+		JOIN projects p ON p.id = ap.project_id
+		WHERE u.id = :userId
+		ORDER BY p.finished ASC, p.created DESC";
 
 		$stmt = $this->connection->prepare($query);
 		$stmt->bindParam(':userId', $this->id);

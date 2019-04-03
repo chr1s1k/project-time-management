@@ -18,8 +18,8 @@ const ProjectReducer = (state = initialState, action) => {
 			return {
 				...state,
 				projects: [
-					...state.projects,
-					action.project
+					action.project,
+					...state.projects
 				],
 				created: true,
 				id: action.project.id

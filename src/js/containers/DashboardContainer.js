@@ -313,7 +313,7 @@ class DashboardContainer extends React.Component {
 												variant="outlined"
 												onClick={this.handleOpenTimesheetDialog}
 											>Vykázat práci</Button>
-											<Dialog open={this.state.timesheetDialogOpened} maxWidth="xs" fullWidth aria-labelledby="form-dialog-title">
+											<Dialog open={this.state.timesheetDialogOpened} maxWidth="xs" fullWidth onEscapeKeyDown={this.handleCloseTimesheetDialog} aria-labelledby="form-dialog-title">
 												<form method="post">
 													<DialogTitle id="form-dialog-title">Vykázání práce</DialogTitle>
 													<DialogContent>
