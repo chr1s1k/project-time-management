@@ -162,7 +162,8 @@ class DashboardContainer extends React.Component {
 		}
 	}
 
-	handleSubmitTimesheet = () => {
+	handleSubmitTimesheet = (event) => {
+		event.preventDefault()
 		let { timesheet } = this.state
 
 		// validace inputu pro zadání počtu vykázaných hodin
@@ -314,7 +315,7 @@ class DashboardContainer extends React.Component {
 												onClick={this.handleOpenTimesheetDialog}
 											>Vykázat práci</Button>
 											<Dialog open={this.state.timesheetDialogOpened} maxWidth="xs" fullWidth onEscapeKeyDown={this.handleCloseTimesheetDialog} aria-labelledby="form-dialog-title">
-												<form method="post">
+												<form method="post" onSubmit={this.handleSubmitTimesheet}>
 													<DialogTitle id="form-dialog-title">Vykázání práce</DialogTitle>
 													<DialogContent>
 														<TextField
@@ -382,7 +383,6 @@ class DashboardContainer extends React.Component {
 															variant="contained"
 															color="primary"
 															disabled={this.props.isLoading}
-															onClick={this.handleSubmitTimesheet}
 														>Vykázat</Button>
 														<Button
 															type="button"

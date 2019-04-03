@@ -29,11 +29,14 @@ const styles = (theme) => ({
 	appbarShrinked: {
 		width: `calc(100% - ${sidebarWidth}px)`,
 		marginLeft: `${sidebarWidth}px`
+	},
+	userIcon: {
+		marginRight: (theme.spacing.unit / 2),
 	}
 })
 
 function NavBarContainer (props) {
-	const { classes, isAuthenticated, sidebarOpened, menuIconVisible } = props
+	const { classes, isAuthenticated, sidebarOpened, menuIconVisible, user } = props
 
 	// react hook
 	const [anchorEl, setAnchorEl] = React.useState(null) // výchozí hodnota pro `anchorEl`
@@ -73,7 +76,8 @@ function NavBarContainer (props) {
 								onClick={handleUserMenu}
 								color="default"
 							>
-								<AccountCircle />
+								<AccountCircle className={classes.userIcon} />
+								<Typography variant="subtitle2">{`${user.firstName} ${user.lastName}`}</Typography>
 							</IconButton>
 							<Menu
 								id="menu-appbar"
@@ -107,6 +111,7 @@ const mapStateToProps = (state) => ({
 	isAuthenticated: state.auth.isAuthenticated,
 	sidebarOpened: state.sidebar.opened,
 	menuIconVisible: state.sidebar.menuIconVisible,
+	user: state.auth.user,
 })
 
 const mapDispatchToProps = (dispatch) => ({
@@ -121,6 +126,7 @@ NavBarContainer.propTypes = {
 	toggleSidebar: PropTypes.func,
 	sidebarOpened: PropTypes.bool,
 	menuIconVisible: PropTypes.bool,
+	user: PropTypes.object,
 }
 
 NavBarContainer.defaultProps = {
