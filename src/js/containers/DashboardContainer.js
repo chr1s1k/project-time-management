@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 import { connect } from 'react-redux'
-import { withStyles, Typography, Drawer, List, ListItem, Divider, ListItemText, ListItemIcon, Grid, Paper, FormControl, InputLabel, Input, Button, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@material-ui/core'
+import { withStyles, Typography, Drawer, List, ListItem, Divider, ListItemText, ListItemIcon, Grid, Paper, FormControl, InputLabel, Input, Button, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem } from '@material-ui/core'
 import { MuiPickersUtilsProvider, InlineDatePicker } from 'material-ui-pickers'
 import MomentUtils from '@date-io/moment'
 import 'moment/locale/cs'
@@ -11,8 +11,18 @@ import ComputerIcon from '@material-ui/icons/Computer'
 import LockIcon from '@material-ui/icons/Lock'
 import PropTypes from 'prop-types'
 
-import { toggleSidebar, loadUserProjects, createProject, loadProjectDetail, createTimesheet, clearProject } from '../actions/actions'
+import {
+	toggleSidebar,
+	loadUserProjects,
+	createProject,
+	loadProjectDetail,
+	createTimesheet,
+	clearProject,
+	deleteTimesheet
+} from '../actions/actions'
+
 import ResultMessage from '../components/ResultMessage/ResultMessage'
+import TimesheetMenu from '../components/Timesheet/TimesheetMenu'
 
 const sidebarWidth = 240
 
@@ -78,7 +88,6 @@ class DashboardContainer extends React.Component {
 			showAddForm: false,
 			project: {
 				title: '',
-				// created: false,
 			},
 			timesheetDialogOpened: false,
 			timesheet: this.initialTimesheetState,
@@ -191,6 +200,14 @@ class DashboardContainer extends React.Component {
 		}
 	}
 
+	handleEditTimesheet = (id) => {
+		console.log(id)
+	}
+
+	handleDeleteTimesheet = (id) => {
+		this.props.deleteTimesheet(id)
+	}
+
 	render() {
 		const { classes, sidebarOpened, projects, project, user } = this.props
 
@@ -283,6 +300,7 @@ class DashboardContainer extends React.Component {
 													<TableCell>Uživatel</TableCell>
 													<TableCell>Poznámka</TableCell>
 													<TableCell align="right">Počet hodin</TableCell>
+													<TableCell></TableCell>
 												</TableRow>
 											</TableHead>
 											<TableFooter>
@@ -291,6 +309,7 @@ class DashboardContainer extends React.Component {
 													<TableCell align="right">
 														<Typography variant="h6">{project.totalHours} h</Typography>
 													</TableCell>
+													<TableCell></TableCell>
 												</TableRow>
 											</TableFooter>
 											<TableBody>
@@ -299,6 +318,12 @@ class DashboardContainer extends React.Component {
 													<TableCell>{timesheet.worker}</TableCell>
 													<TableCell>{timesheet.note}</TableCell>
 													<TableCell align="right">{timesheet.hours} h</TableCell>
+													<TableCell align="right">
+														<TimesheetMenu id={timesheet.id}>
+															<MenuItem onClick={() => {this.handleEditTimesheet(timesheet.id)}}>Editovat</MenuItem>
+															<MenuItem onClick={() => {this.handleDeleteTimesheet(timesheet.id)}}>Smazat</MenuItem>
+														</TimesheetMenu>
+													</TableCell>
 												</TableRow>)}
 											</TableBody>
 										</Table>
@@ -428,6 +453,7 @@ function mapDispatchToProps(dispatch) {
 		loadProjectDetail: (projectId) => dispatch(loadProjectDetail(projectId)),
 		createTimesheet: (timesheet) => dispatch(createTimesheet(timesheet)),
 		clearProject: () => dispatch(clearProject()),
+		deleteTimesheet: (id) => dispatch(deleteTimesheet(id)),
 	}
 }
 
@@ -450,6 +476,7 @@ DashboardContainer.propTypes = {
 	project: PropTypes.object,
 	createTimesheet: PropTypes.func,
 	clearProject: PropTypes.func,
+	deleteTimesheet: PropTypes.func,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DashboardContainer))

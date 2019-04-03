@@ -321,12 +321,20 @@ export function loadProjectDetail(id) {
 // akce pro práci s timesheety
 
 export const TIMESHEET_CREATED = 'TIMESHEET_CREATED'
+export const TIMESHEET_DELETED = 'TIMESHEET_DELETED'
 
 export function timesheetCreated(timesheets, totalHours) {
 	return {
 		type: TIMESHEET_CREATED,
 		timesheets,
 		totalHours,
+	}
+}
+
+export function timesheetDeleted(id) {
+	return {
+		type: TIMESHEET_DELETED,
+		id
 	}
 }
 
@@ -343,6 +351,31 @@ export function createTimesheet(timesheet) {
 			dispatch(timesheetCreated(response.data.project.timesheets, response.data.project.totalHours))
 			dispatch(showMessage(response.data.message))
 			return response
+		}).catch(err => {
+			dispatch(hideProgressBar())
+			let errorMessage = handleErrorMessage(err)
+			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
+				dispatch(logoutUser(errorMessage))
+			} else {
+				dispatch(showMessage(errorMessage))
+			}
+		})
+	}
+}
+
+export function deleteTimesheet(id) {
+	return (dispatch) => {
+		dispatch(showProgressBar)
+
+		return axios('http://localhost/project-time-management/public/api/deleteTimesheet.php', {
+			method: 'DELETE',
+			params: {
+				id: id
+			}
+		}).then(response => {
+			dispatch(hideProgressBar())
+			dispatch(timesheetDeleted(id))
+			dispatch(showMessage(response.data.message))
 		}).catch(err => {
 			dispatch(hideProgressBar())
 			let errorMessage = handleErrorMessage(err)
