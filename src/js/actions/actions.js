@@ -379,6 +379,7 @@ export function deleteTimesheet(id, projectId) {
 			dispatch(hideProgressBar())
 			dispatch(timesheetDeleted(response.data.project.timesheets, response.data.project.totalHours))
 			dispatch(showMessage(response.data.message))
+			return response
 		}).catch(err => {
 			dispatch(hideProgressBar())
 			let errorMessage = handleErrorMessage(err)

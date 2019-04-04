@@ -224,7 +224,12 @@ class DashboardContainer extends React.Component {
 
 	handleDeleteTimesheet = () => {
 		const { id } = this.state.deleteDialog
-		this.props.deleteTimesheet(id, this.props.project.id)
+		const deleted = this.props.deleteTimesheet(id, this.props.project.id)
+		deleted.then(result => {
+			if (result && result.statusText.toLowerCase() === 'ok') {
+				this.handleCloseDeleteDialog()
+			}
+		})
 	}
 
 	openDeleteDialog = (timesheetId, date) => {
