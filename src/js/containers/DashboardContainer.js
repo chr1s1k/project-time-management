@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'
 import { connect } from 'react-redux'
-import { withStyles, Typography, Drawer, List, ListItem, Divider, ListItemText, ListItemIcon, Grid, Paper, FormControl, InputLabel, Input, Button, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem } from '@material-ui/core'
+import { withStyles, Typography, Drawer, List, ListItem, Divider, ListItemText, ListItemIcon, Grid, Paper, FormControl, InputLabel, Input, Button, Table, TableHead, TableRow, TableCell, TableBody, TableFooter, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem, IconButton, DialogContentText } from '@material-ui/core'
+import MuiDialogTitle from '@material-ui/core/DialogTitle'
 import { MuiPickersUtilsProvider, InlineDatePicker } from 'material-ui-pickers'
 import MomentUtils from '@date-io/moment'
 import 'moment/locale/cs'
@@ -9,6 +10,7 @@ import { Link } from 'react-router-dom'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import ComputerIcon from '@material-ui/icons/Computer'
 import LockIcon from '@material-ui/icons/Lock'
+import CloseIcon from '@material-ui/icons/Close'
 import PropTypes from 'prop-types'
 
 import {
@@ -73,6 +75,14 @@ const styles = (theme) => ({
 	},
 	projectFinished: {
 		color: '#eee',
+	},
+	dialogTitle: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingTop: theme.spacing.unit * 2,
+		paddingBottom: theme.spacing.unit * 2,
+		paddingRight: theme.spacing.unit,
 	}
 })
 
@@ -94,6 +104,11 @@ class DashboardContainer extends React.Component {
 			},
 			timesheetDialogOpened: false,
 			timesheet: this.initialTimesheetState,
+			deleteDialog: {
+				opened: false,
+				id: null,
+				date: null,
+			},
 		}
 
 		if (props.location.pathname === '/dashboard/new') {
@@ -207,8 +222,31 @@ class DashboardContainer extends React.Component {
 		console.log(id)
 	}
 
-	handleDeleteTimesheet = (id) => {
+	handleDeleteTimesheet = () => {
+		const { id } = this.state.deleteDialog
 		this.props.deleteTimesheet(id, this.props.project.id)
+	}
+
+	openDeleteDialog = (timesheetId, date) => {
+		this.setState({
+			deleteDialog: {
+				...this.state.deleteDialog,
+				opened: true,
+				id: timesheetId,
+				date: date,
+			}
+		})
+	}
+
+	handleCloseDeleteDialog = () => {
+		this.setState({
+			deleteDialog: {
+				...this.state.deleteDialog,
+				opened: false,
+				id: null,
+				date: null,
+			}
+		})
 	}
 
 	render() {
@@ -332,7 +370,8 @@ class DashboardContainer extends React.Component {
 													<TableCell align="right">
 														<TimesheetMenu id={timesheet.id}>
 															<MenuItem onClick={() => {this.handleEditTimesheet(timesheet.id)}}>Editovat</MenuItem>
-															<MenuItem onClick={() => {this.handleDeleteTimesheet(timesheet.id)}}>Smazat</MenuItem>
+															{/* <MenuItem onClick={() => {this.handleDeleteTimesheet(timesheet.id)}}>Smazat</MenuItem> */}
+															<MenuItem onClick={() => {this.openDeleteDialog(timesheet.id, timesheet.date)}}>Smazat</MenuItem>
 														</TimesheetMenu>
 													</TableCell>
 												</TableRow>)}
@@ -352,7 +391,12 @@ class DashboardContainer extends React.Component {
 											>Vykázat práci</Button>
 											<Dialog open={this.state.timesheetDialogOpened} maxWidth="xs" fullWidth onEscapeKeyDown={this.handleCloseTimesheetDialog} aria-labelledby="form-dialog-title">
 												<form method="post" onSubmit={this.handleSubmitTimesheet}>
-													<DialogTitle id="form-dialog-title">Vykázání práce</DialogTitle>
+													<MuiDialogTitle id="form-dialog-title" disableTypography className={classes.dialogTitle}>
+														<Typography variant="h6">Vykázání práce</Typography>
+														<IconButton aria-label="Zavřít" onClick={this.handleCloseTimesheetDialog}>
+															<CloseIcon />
+														</IconButton>
+													</MuiDialogTitle>
 													<DialogContent>
 														<TextField
 															margin="normal"
@@ -430,6 +474,26 @@ class DashboardContainer extends React.Component {
 											</Dialog>
 										</Fragment>
 									}
+									<Dialog open={this.state.deleteDialog.opened} maxWidth="sm" fullWidth onEscapeKeyDown={this.handleCloseDeleteDialog} aria-labelledby="delete-dialog-title">
+										<DialogTitle id="delete-dialog-title">Smazání výkazu</DialogTitle>
+										<DialogContent>
+											<DialogContentText>Opravdu si přejete smazat tento záznam ze dne {this.state.deleteDialog.date}?</DialogContentText>
+										</DialogContent>
+										<DialogActions>
+											<Button
+												type="button"
+												variant="contained"
+												color="primary"
+												onClick={this.handleDeleteTimesheet}
+												disabled={this.props.isLoading}
+											>Smazat</Button>
+											<Button
+												type="button"
+												variant="text"
+												onClick={this.handleCloseDeleteDialog}
+											>Zavřít</Button>
+										</DialogActions>
+									</Dialog>
 								</Fragment>
 							) : (
 								<Typography variant="h5">Začněte vybráním projektu vlevo nebo přidejte nový.</Typography>
