@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { IconButton, Menu, Tooltip } from '@material-ui/core'
 import SettingsIcon from '@material-ui/icons/Settings'
 
 function TimesheetMenu (props) {
-	const { id, children } = props
+	const { id, children, deleteDialogOpened } = props
 
 	// react hook
 	const [menuAnchorEl, setMenuAnchorEl] = React.useState(null) // výchozí hodnota pro konstantu menuAnchorEl je null
@@ -17,6 +17,14 @@ function TimesheetMenu (props) {
 	function handleCloseMenu() {
 		setMenuAnchorEl(null)
 	}
+
+	// https://reactjs.org/docs/hooks-effect.html
+	// componentDidMount + componentDidUpdate dohromady
+	useEffect(() => {
+		if (deleteDialogOpened) { // pokud je otevřen dialog pro smazání timesheetum, tak zavřeme popup menu s možnostmi
+			handleCloseMenu()
+		}
+	})
 
 	return (
 		<div>
@@ -52,6 +60,7 @@ function TimesheetMenu (props) {
 TimesheetMenu.propTypes = {
 	id: PropTypes.number,
 	children: PropTypes.node,
+	deleteDialogOpened: PropTypes.bool,
 }
 
 export default TimesheetMenu

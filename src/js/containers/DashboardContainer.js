@@ -109,6 +109,7 @@ class DashboardContainer extends React.Component {
 				id: null,
 				date: null,
 			},
+			hoursInputError: false,
 		}
 
 		if (props.location.pathname === '/dashboard/new') {
@@ -195,6 +196,8 @@ class DashboardContainer extends React.Component {
 
 		// validace inputu pro zadání počtu vykázaných hodin
 		if (timesheet.hours.trim() !== '' && parseFloat(timesheet.hours) > 0) {
+			this.setState({ hoursInputError: false })
+
 			timesheet = Object.assign({}, timesheet, {
 				date: Moment(timesheet.date).format('YYYY-MM-DD'),
 				hours: parseFloat(timesheet.hours),
@@ -215,6 +218,7 @@ class DashboardContainer extends React.Component {
 			})
 		} else {
 			this.hoursInput.current.focus()
+			this.setState({ hoursInputError: true })
 		}
 	}
 
@@ -373,9 +377,8 @@ class DashboardContainer extends React.Component {
 													<TableCell>{timesheet.note}</TableCell>
 													<TableCell align="right">{timesheet.hours} h</TableCell>
 													<TableCell align="right">
-														<TimesheetMenu id={timesheet.id}>
+														<TimesheetMenu id={timesheet.id} deleteDialogOpened={this.state.deleteDialog.opened}>
 															<MenuItem onClick={() => {this.handleEditTimesheet(timesheet.id)}}>Editovat</MenuItem>
-															{/* <MenuItem onClick={() => {this.handleDeleteTimesheet(timesheet.id)}}>Smazat</MenuItem> */}
 															<MenuItem onClick={() => {this.openDeleteDialog(timesheet.id, timesheet.date)}}>Smazat</MenuItem>
 														</TimesheetMenu>
 													</TableCell>
@@ -448,6 +451,8 @@ class DashboardContainer extends React.Component {
 															inputRef={this.hoursInput}
 															fullWidth
 															required
+															error={this.state.hoursInputError}
+															helperText={this.state.hoursInputError ? 'Zadejte číslo větší než nula.' : null}
 															onChange={this.handleTimesheetDialogInputChange}
 														/>
 														<TextField
