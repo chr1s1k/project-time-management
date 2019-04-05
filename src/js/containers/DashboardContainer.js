@@ -38,6 +38,7 @@ const styles = (theme) => ({
 	content: {
 		paddingLeft: theme.spacing.unit * 3,
 		paddingRight: theme.spacing.unit * 3,
+		marginTop: theme.spacing.unit * 5,
 		transition: theme.transitions.create(['margin'], {
 			easing: theme.transitions.easing.sharp,
 			duration: theme.transitions.duration.leavingScreen,

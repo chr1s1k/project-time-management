@@ -31,8 +31,8 @@ const App = () => {
 	return (
 		<MuiThemeProvider theme={theme}>
 			<CssBaseline />
-			<NavBarContainer sidebarWidth={sidebarWidth} />
 			<ProgressBarContainer />
+			<NavBarContainer sidebarWidth={sidebarWidth} />
 			<MessageContainer />
 			<Switch>
 				<Route exact path="/" component={LoginContainer} />
