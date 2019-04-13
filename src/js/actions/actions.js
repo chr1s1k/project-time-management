@@ -20,6 +20,7 @@ const handleErrorMessage = (err) => {
 export const LOGIN_REQUEST = 'LOGIN_REQUEST'
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS'
 export const LOGIN_ERROR = 'LOGIN_ERROR'
+export const LOGIN_EXPIRED = 'LOGIN_EXPIRED'
 
 export function requestLogin(credentials) {
 	return {
@@ -48,6 +49,12 @@ export function loginError(message) {
 		isFetching: false,
 		isAuthenticated: false,
 		message: message
+	}
+}
+
+export function loginExpired() {
+	return {
+		type: LOGIN_EXPIRED
 	}
 }
 
@@ -265,7 +272,8 @@ export function loadUserProjects(userId) {
 			dispatch(hideProgressBar())
 			let errorMessage = handleErrorMessage(err)
 			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
-				dispatch(logoutUser(errorMessage))
+				// dispatch(logoutUser(errorMessage))
+				dispatch(loginExpired())
 			} else {
 				dispatch(showMessage(errorMessage))
 			}
@@ -308,7 +316,8 @@ export function loadProjectDetail(id) {
 			dispatch(hideProgressBar())
 			let errorMessage = handleErrorMessage(err)
 			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
-				dispatch(logoutUser(errorMessage))
+				dispatch(loginExpired())
+				// dispatch(logoutUser(errorMessage))
 			} else {
 				dispatch(showMessage(errorMessage))
 			}
@@ -356,7 +365,8 @@ export function createTimesheet(timesheet) {
 			dispatch(hideProgressBar())
 			let errorMessage = handleErrorMessage(err)
 			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
-				dispatch(logoutUser(errorMessage))
+				// dispatch(logoutUser(errorMessage))
+				dispatch(loginExpired())
 			} else {
 				dispatch(showMessage(errorMessage))
 			}
@@ -384,7 +394,8 @@ export function deleteTimesheet(id, projectId) {
 			dispatch(hideProgressBar())
 			let errorMessage = handleErrorMessage(err)
 			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
-				dispatch(logoutUser(errorMessage))
+				// dispatch(logoutUser(errorMessage))
+				dispatch(loginExpired())
 			} else {
 				dispatch(showMessage(errorMessage))
 			}

@@ -62,7 +62,6 @@ class LoginContainer extends React.Component {
 
 		return (
 			<Fragment>
-
 				<Grid container justify="center" className={classes.indentTop}>
 					<Grid item xs={10} sm={8} md={6} lg={4} xl={2}>
 						<Paper className={classes.paper}>

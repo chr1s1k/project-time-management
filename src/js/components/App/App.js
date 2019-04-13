@@ -9,6 +9,7 @@ import DashboardContainer from '../../containers/DashboardContainer'
 import NavBarContainer from '../../containers/NavBarContainer'
 import MessageContainer from '../../containers/MessageContainer'
 import ProgressBarContainer from '../../containers/ProgressBarContainer'
+import LoginExpiredContainer from '../../containers/LoginExpiredContainer'
 
 const sidebarWidth = 240
 
@@ -40,6 +41,7 @@ const App = () => {
 				<Route exact path="/dashboard/:projectId" component={requiredAuth(DashboardContainer)} />
 				<Route path="/dashboard" component={requiredAuth(DashboardContainer)} />
 			</Switch>
+			<LoginExpiredContainer />
 		</MuiThemeProvider>
 	)
 }
