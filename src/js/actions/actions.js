@@ -331,6 +331,7 @@ export function loadProjectDetail(id) {
 
 export const TIMESHEET_CREATED = 'TIMESHEET_CREATED'
 export const TIMESHEET_DELETED = 'TIMESHEET_DELETED'
+export const TIMESHEET_EDITED = 'TIMESHEET_EDITED'
 
 export function timesheetCreated(timesheets, totalHours) {
 	return {
@@ -343,6 +344,14 @@ export function timesheetCreated(timesheets, totalHours) {
 export function timesheetDeleted(timesheets, totalHours) {
 	return {
 		type: TIMESHEET_DELETED,
+		timesheets,
+		totalHours,
+	}
+}
+
+export function timesheetEdited(timesheets, totalHours) {
+	return {
+		type: TIMESHEET_EDITED,
 		timesheets,
 		totalHours,
 	}
@@ -388,6 +397,32 @@ export function deleteTimesheet(id, projectId) {
 		}).then(response => {
 			dispatch(hideProgressBar())
 			dispatch(timesheetDeleted(response.data.project.timesheets, response.data.project.totalHours))
+			dispatch(showMessage(response.data.message))
+			return response
+		}).catch(err => {
+			dispatch(hideProgressBar())
+			let errorMessage = handleErrorMessage(err)
+			if (err.response && err.response.status === 401) { // pokud vypršela platnost tokenu, tak uživatele odhlaš
+				// dispatch(logoutUser(errorMessage))
+				dispatch(loginExpired())
+			} else {
+				dispatch(showMessage(errorMessage))
+			}
+		})
+	}
+}
+
+export function editTimesheet(timesheet) {
+	return (dispatch) => {
+		dispatch(showProgressBar())
+
+		return axios('/api/editTimesheet.php', {
+			method: 'POST',
+			data: timesheet,
+			withCredentials: true,
+		}).then(response => {
+			dispatch(hideProgressBar())
+			dispatch(timesheetEdited(response.data.project.timesheets, response.data.project.totalHours))
 			dispatch(showMessage(response.data.message))
 			return response
 		}).catch(err => {

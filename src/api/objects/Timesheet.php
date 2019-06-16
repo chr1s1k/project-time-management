@@ -208,4 +208,30 @@ class Timesheet {
 		}
 	}
 
+	public function edit($timesheetId, $userId, $hours, $note = null) {
+		if (is_null($this->connection)) {
+			return false;
+		}
+
+		$query = "UPDATE " . $this->tableName . " SET hours = :hours, note = :note WHERE id = :timesheetId AND user_id = :userId";
+
+		if (!is_null($note)) {
+			$note = htmlspecialchars(strip_tags($note));
+		}
+
+		$stmt = $this->connection->prepare($query);
+		$stmt->bindParam(':hours', $hours);
+		$stmt->bindParam(':note', $note);
+		$stmt->bindParam(':timesheetId', $timesheetId);
+		$stmt->bindParam(':userId', $userId);
+
+		try {
+			return $stmt->execute();
+		} catch (PDOException $e) {
+			// var_dump($e);
+			// die;
+			return false;
+		}
+	}
+
 }

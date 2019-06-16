@@ -20,7 +20,8 @@ import {
 	loadProjectDetail,
 	createTimesheet,
 	clearProject,
-	deleteTimesheet
+	deleteTimesheet,
+	editTimesheet
 } from '../actions/actions'
 
 import ResultMessage from '../components/ResultMessage/ResultMessage'
@@ -111,6 +112,7 @@ class DashboardContainer extends React.Component {
 				date: null,
 			},
 			hoursInputError: false,
+			editMode: false,
 		}
 
 		if (props.location.pathname === '/dashboard/new') {
@@ -170,7 +172,11 @@ class DashboardContainer extends React.Component {
 	}
 
 	handleCloseTimesheetDialog = () => {
-		this.setState({ timesheetDialogOpened: false })
+		this.setState({
+			timesheetDialogOpened: false,
+			timesheet: this.initialTimesheetState,
+			editMode: false
+		})
 	}
 
 	handleTimesheetDialogInputChange = (event) => {
@@ -196,7 +202,7 @@ class DashboardContainer extends React.Component {
 		let { timesheet } = this.state
 
 		// validace inputu pro zadání počtu vykázaných hodin
-		if (timesheet.hours.trim() !== '' && parseFloat(timesheet.hours) > 0) {
+		if (parseFloat(timesheet.hours) > 0) {
 			this.setState({ hoursInputError: false })
 
 			timesheet = Object.assign({}, timesheet, {
@@ -207,13 +213,23 @@ class DashboardContainer extends React.Component {
 				note: timesheet.note.trim() !== '' ? timesheet.note : null
 			})
 
-			const created = this.props.createTimesheet(timesheet)
-			created.then(result => {
-				// pokud byl timesheet úspěšně vytvořen, tak zavři dialog a vyresetuj formulář (state)
+			let request
+
+			// v případě editace přidej ID timesheetu
+			if (this.state.editMode) {
+				timesheet.id = this.state.timesheet.id
+				request = this.props.editTimesheet(timesheet)
+			} else {
+				request = this.props.createTimesheet(timesheet)
+			}
+
+			request.then(result => {
+				// pokud byl timesheet úspěšně vytvořen / editován, tak zavři dialog a vyresetuj formulář (state)
 				if (result && result.statusText.toLowerCase() === 'ok') {
 					this.setState({
 						timesheetDialogOpened: false,
 						timesheet: this.initialTimesheetState,
+						editMode: false,
 					})
 				}
 			})
@@ -224,7 +240,19 @@ class DashboardContainer extends React.Component {
 	}
 
 	handleEditTimesheet = (id) => {
-		console.log(id)
+		const timesheet = this.props.project.timesheets.find(item => item.id === id)
+
+		this.setState({
+			editMode: true,
+			timesheet: {
+				id: id,
+				date: timesheet.date,
+				hours: timesheet.hours,
+				note: timesheet.note ? timesheet.note : ''
+			}
+		})
+
+		this.handleOpenTimesheetDialog()
 	}
 
 	handleDeleteTimesheet = () => {
@@ -373,12 +401,12 @@ class DashboardContainer extends React.Component {
 											</TableFooter>
 											<TableBody>
 												{project.timesheets && project.timesheets.map(timesheet => <TableRow key={timesheet.id} hover>
-													<TableCell>{timesheet.date}</TableCell>
+													<TableCell>{Moment(timesheet.date).format('D.M.YYYY')}</TableCell>
 													<TableCell>{timesheet.worker}</TableCell>
 													<TableCell>{timesheet.note}</TableCell>
 													<TableCell align="right">{timesheet.hours} h</TableCell>
 													<TableCell align="right">
-														<TimesheetMenu id={timesheet.id} deleteDialogOpened={this.state.deleteDialog.opened}>
+														<TimesheetMenu id={timesheet.id} dialogOpened={this.state.deleteDialog.opened || this.state.timesheetDialogOpened}>
 															<MenuItem onClick={() => {this.handleEditTimesheet(timesheet.id)}}>Editovat</MenuItem>
 															<MenuItem onClick={() => {this.openDeleteDialog(timesheet.id, timesheet.date)}}>Smazat</MenuItem>
 														</TimesheetMenu>
@@ -440,6 +468,7 @@ class DashboardContainer extends React.Component {
 																fullWidth
 																required
 																onChange={this.handleTimesheetDialogInputChange}
+																disabled={this.state.editMode}
 															/>
 														</MuiPickersUtilsProvider>
 														<TextField
@@ -474,7 +503,7 @@ class DashboardContainer extends React.Component {
 															variant="contained"
 															color="primary"
 															disabled={this.props.isLoading}
-														>Vykázat</Button>
+														>{this.state.editMode ? 'Uložit změny' : 'Vykázat'}</Button>
 														<Button
 															type="button"
 															variant="text"
@@ -540,6 +569,7 @@ function mapDispatchToProps(dispatch) {
 		createTimesheet: (timesheet) => dispatch(createTimesheet(timesheet)),
 		clearProject: () => dispatch(clearProject()),
 		deleteTimesheet: (id, projectId) => dispatch(deleteTimesheet(id, projectId)),
+		editTimesheet: (timesheet) => dispatch(editTimesheet(timesheet)),
 	}
 }
 
@@ -563,6 +593,7 @@ DashboardContainer.propTypes = {
 	createTimesheet: PropTypes.func,
 	clearProject: PropTypes.func,
 	deleteTimesheet: PropTypes.func,
+	editTimesheet: PropTypes.func,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DashboardContainer))

@@ -218,7 +218,7 @@ class Project {
 					'id' => (int) $row['id'],
 					'worker' => $row['worker'],
 					'hours' => (float) $row['hours'],
-					'date' => date('j.n.Y', strtotime($row['date'])),
+					'date' => date('Y-m-d', strtotime($row['date'])),
 					'note' => $row['note'],
 				);
 				array_push($timesheets, $timesheet);
